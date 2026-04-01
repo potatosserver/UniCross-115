@@ -81,13 +81,12 @@
     <div class="search-card">
         <div id="norm-section">
             <label class="input-label">准考證號或姓名 (按下Enter 送出)</label>
-            <input type="text" id="userInput" placeholder="例如: 葉學群 或 11000101" onkeypress="if(event.key==='Enter') handleSearchClick()">
+            <input type="text" id="userInput" placeholder="例如: 葉學群 或 11000101" onkeypress="if(event.key==='Enter') handleSearchClick(true)">
         </div>
 
         <div id="adv-section" class="adv-area">
             <div>
                 <label class="input-label">1. 選擇考場</label>
-                <!-- 這裡加入了不限定考場選項 -->
                 <select id="siteSelect">
                     <option value="">-- 請選擇考場範圍 --</option>
                     <option value="ALL_SITES" style="font-weight:bold; color:var(--primary);">🌏不限定考場 (全台搜尋)</option>
@@ -100,7 +99,7 @@
             </div>
         </div>
 
-        <button id="searchBtn" class="main-btn" onclick="handleSearchClick()" disabled>立即查詢數據</button>
+        <button id="searchBtn" class="main-btn" onclick="handleSearchClick(true)" disabled>立即查詢數據</button>
     </div>
 
     <div id="resultArea"></div>
@@ -159,24 +158,55 @@
                 }
             }
 
+            // 初始化 UI
             const sl = document.getElementById('schoolList');
             Object.keys(schoolToDepts).sort().forEach(s => {
                 const opt = document.createElement('option'); opt.value = s; sl.appendChild(opt);
             });
-
             const ss = document.getElementById('siteSelect');
-            // 原有的考場清單
             [...new Set(TEST_SITES.map(x => x[2]))].sort().forEach(v => {
                 const o = document.createElement('option'); o.value = v; o.innerText = v; ss.appendChild(o);
             });
 
             document.getElementById('dataStatus').innerText = "✅ 數據同步成功";
             document.getElementById('searchBtn').disabled = false;
-            addAdmissionRow(); 
+            
+            // 讀取網址參數並自動搜尋
+            handleUrlParams();
+
         } catch (e) { document.getElementById('dataStatus').innerText = "❌ 資料庫載入失敗"; console.error(e); }
     };
 
-    function addAdmissionRow() {
+    function handleUrlParams() {
+        const params = new URLSearchParams(window.location.search);
+        const mode = params.get('m');
+        const query = params.get('q');
+        const site = params.get('site');
+        const codes = params.get('codes');
+
+        if (mode === 'adv' || codes) {
+            switchMode('adv');
+            if (site) document.getElementById('siteSelect').value = site;
+            if (codes) {
+                const codeArr = codes.split(',');
+                document.getElementById('admissionList').innerHTML = ""; // 清空預設
+                codeArr.forEach(c => {
+                    addAdmissionRow(c);
+                });
+            } else {
+                addAdmissionRow();
+            }
+            if (site || codes) handleSearchClick(false);
+        } else {
+            addAdmissionRow();
+            if (query) {
+                document.getElementById('userInput').value = query;
+                handleSearchClick(false);
+            }
+        }
+    }
+
+    function addAdmissionRow(initialCode = "") {
         const container = document.getElementById('admissionList');
         if (container.children.length >= 12) return;
         rowCounter++;
@@ -184,7 +214,7 @@
         const row = document.createElement('div');
         row.className = 'admission-row';
         row.innerHTML = `
-            <input type="text" class="code-input" placeholder="代碼..." maxlength="6" oninput="onCodeInput(this, '${dlId}')">
+            <input type="text" class="code-input" placeholder="代碼..." maxlength="6" value="${initialCode}" oninput="onCodeInput(this, '${dlId}')">
             <input type="text" class="sch-input" list="schoolList" placeholder="校名..." oninput="onRowSchoolInput(this, '${dlId}')">
             <div>
                 <input type="text" class="dept-input" list="${dlId}" placeholder="系組搜尋..." disabled>
@@ -193,6 +223,7 @@
             <button type="button" class="remove-btn" onclick="this.parentElement.remove()">×</button>
         `;
         container.appendChild(row);
+        if(initialCode) onCodeInput(row.querySelector('.code-input'), dlId);
     }
 
     function onCodeInput(codeEl, dlId) {
@@ -233,7 +264,25 @@
         render(historyResults[m].ids, historyResults[m].criteria);
     }
 
-    function handleSearchClick() {
+    function updateUrlState() {
+        const params = new URLSearchParams();
+        if (currentMode === 'normal') {
+            const q = document.getElementById('userInput').value.trim();
+            if (q) params.set('q', q);
+        } else {
+            params.set('m', 'adv');
+            const site = document.getElementById('siteSelect').value;
+            if (site) params.set('site', site);
+            const codes = Array.from(document.querySelectorAll('.code-input'))
+                               .map(el => el.value.trim())
+                               .filter(v => v.length === 6);
+            if (codes.length > 0) params.set('codes', codes.join(','));
+        }
+        const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+        window.history.replaceState({}, '', newUrl);
+    }
+
+    function handleSearchClick(shouldUpdateUrl = true) {
         let finalIdsSet = new Set(), criteria = [];
         if (currentMode === 'normal') {
             const q = clean(document.getElementById('userInput').value);
@@ -249,7 +298,6 @@
             const site = document.getElementById('siteSelect').value;
             if (!site) { alert("請先選擇考場範圍"); return; }
             
-            // 邏輯修正：判斷是否為全台搜尋
             const isAllSites = site === "ALL_SITES";
             const ranges = isAllSites ? [] : TEST_SITES.filter(s => s[2] === site);
             
@@ -260,7 +308,6 @@
                     const ids = rawData[typeKey][s][d]["錄取名單"] || [];
                     criteria.push({ school: s, dept: d });
                     ids.forEach(id => { 
-                        // 如果不限考場，則直接加入；如果有限定，則比對區間
                         if (isAllSites || ranges.some(r => id >= r[0] && id <= r[1])) {
                             finalIdsSet.add(id); 
                         }
@@ -271,6 +318,7 @@
         let results = Array.from(finalIdsSet);
         historyResults[currentMode] = { ids: results, criteria: criteria };
         render(results, criteria);
+        if (shouldUpdateUrl) updateUrlState();
     }
 
     function maskName(n) { n = clean(n); return (n.length < 2 || n.includes('Ｏ')) ? n : n[0] + 'Ｏ' + (n.length > 2 ? n[n.length - 1] : ''); }
@@ -283,7 +331,12 @@
     function render(ids, criteria) {
         const area = document.getElementById('resultArea');
         area.innerHTML = "";
-        if (ids.length === 0) return;
+        if (ids.length === 0) {
+            if (document.getElementById('userInput').value || document.querySelectorAll('.admission-row').length > 0) {
+                area.innerHTML = "<div style='text-align:center; padding:40px; color:#64748b;'>查無符合條件的資料</div>";
+            }
+            return;
+        }
         ids.forEach(id => {
             const wrap = document.createElement('div');
             wrap.className = `student-wrapper ${ids.length <= 1 ? 'active' : ''}`;
