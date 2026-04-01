@@ -37,8 +37,26 @@
         .search-card { background: var(--md-sys-color-surface-container); border-radius: 28px; padding: 24px; margin-bottom: 24px; }
         .input-group { margin-bottom: 16px; position: relative; }
         .label-text { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--md-sys-color-secondary); }
-        input, select { width: 100%; padding: 14px 16px; border: 1px solid var(--md-sys-color-outline); border-radius: 14px; background: var(--md-sys-color-surface); font-size: 16px; box-sizing: border-box; transition: var(--transition); }
-        input:focus { outline: 2px solid var(--md-sys-color-primary); border-color: transparent; }
+        
+        /* 修正 Select 箭頭太貼邊緣的問題 */
+        input, select { 
+            width: 100%; padding: 14px 16px; border: 1px solid var(--md-sys-color-outline); 
+            border-radius: 14px; background: var(--md-sys-color-surface); font-size: 16px; 
+            box-sizing: border-box; transition: var(--transition); 
+        }
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            /* 自定義 SVG 箭頭，向內移動一點 */
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24' fill='%23535f70'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 24px;
+            padding-right: 40px; /* 留出空間給箭頭 */
+        }
+        input:focus, select:focus { outline: 2px solid var(--md-sys-color-primary); border-color: transparent; }
+
         .adv-row { display: grid; grid-template-columns: 100px 1fr 1.2fr 48px; gap: 12px; margin-bottom: 12px; align-items: flex-end; }
         @media (max-width: 600px) { .adv-row { grid-template-columns: 1fr; } .btn-remove { width: 100%; } }
         .btn-main { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); border: none; padding: 18px; border-radius: 100px; width: 100%; font-weight: 600; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: var(--transition); }
@@ -138,29 +156,25 @@
 
 <script>
     const GITHUB_URL = "https://raw.githubusercontent.com/potatosserver/UniCross-115/refs/heads/main/exam_local_db.json";
-    const SITES_URL = "sites.json"; // 這裡請替換為您 sites.json 的實際位置
+    const SITES_URL = "sites.json"; 
     
     let rawData = null, testSites = [], idToIndex = {}, schoolDepts = {}, codeToDept = {}, rowIdx = 0, currentMode = 'normal';
     let resultsHistory = { normal: { ids: [], crit: [] }, adv: { ids: [], crit: [] } };
 
     window.onload = async () => {
         try {
-            // 同步載入兩個資料來源
             const [dbRes, sitesRes] = await Promise.all([
                 fetch(GITHUB_URL),
                 fetch(SITES_URL)
             ]);
-            
             rawData = await dbRes.json();
             testSites = await sitesRes.json();
-            
             processData();
             initUI();
             handleUrlParams();
             document.getElementById('loading-overlay').style.display = 'none';
         } catch (e) {
-            document.getElementById('data-status').innerText = "❌ 資料庫載入失敗，請檢查網路連線";
-            console.error(e);
+            document.getElementById('data-status').innerText = "❌ 資料庫載入失敗";
         }
     };
 
@@ -188,7 +202,7 @@
         Object.keys(schoolDepts).sort().forEach(s => { const o = document.createElement('option'); o.value = s; dl.appendChild(o); });
         const ss = document.getElementById('siteSelect');
         [...new Set(testSites.map(x => x[2]))].sort().forEach(v => { const o = document.createElement('option'); o.value = v; o.innerText = v; ss.appendChild(o); });
-        document.getElementById('data-status').innerText = "✅ 115 數據已載入 (包含姓名/考場/面試日期)";
+        document.getElementById('data-status').innerText = "✅ 115 數據已載入";
         document.getElementById('searchBtn').disabled = false;
     }
 
@@ -282,7 +296,7 @@
     function openHelp() {
         document.getElementById('m-title').innerText = "系統說明"; document.getElementById('m-sub').innerText = "115 學年度聯合查榜服務";
         const statsEl = document.getElementById('m-stats'); statsEl.innerHTML = ""; statsEl.style.display = 'none'; 
-        document.getElementById('modalBody').innerHTML = `<div style="padding:8px 24px 24px; font-size:15px;"><p>1. 本系統數據包含普大（CAC）與科大（JCTV）篩選數據。</p><p>2. <b>姓名查詢：</b>支援全名或遮罩名比對。</p><p>3. <b>考場範圍：</b>數據已由外部 JSON 檔案動態載入。</p></div>`;
+        document.getElementById('modalBody').innerHTML = `<div style="padding:8px 24px 24px; font-size:15px;"><p>1. 本系統數據包含普大與科大篩選數據。</p><p>2. 姓名搜尋支援全名或遮罩名。</p></div>`;
         document.getElementById('modalMask').style.display = 'flex';
     }
 
