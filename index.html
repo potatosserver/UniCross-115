@@ -1,3 +1,5 @@
+--- START OF FILE index (2).html ---
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -123,6 +125,18 @@
         .modal-body { padding: 8px; overflow-y: auto; flex: 1; }
         .list-row { padding: 14px 24px; border-radius: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .list-row:hover { background: var(--md-sys-color-surface-container-high); }
+
+        /* FAB Help */
+        .fab-help {
+            position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px;
+            border-radius: 16px; background: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container); border: none;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 900; transition: var(--transition);
+        }
+        .fab-help:hover { transform: scale(1.1); background: var(--md-sys-color-primary); color: white; }
+        .help-content { padding: 24px; font-size: 15px; color: var(--md-sys-color-on-surface); }
+        .help-content b { color: var(--md-sys-color-primary); }
     </style>
 </head>
 <body>
@@ -176,6 +190,10 @@
 
     <div id="resultsArea"></div>
 </div>
+
+<button class="fab-help" onclick="openHelp()">
+    <span class="material-symbols-outlined">help</span>
+</button>
 
 <!-- Modal -->
 <div id="modalMask" class="modal-mask" onclick="closeModal()">
@@ -393,12 +411,29 @@
         const body = document.getElementById('modalBody'); body.innerHTML = "";
         ids.forEach(id => {
             const r = document.createElement('div'); r.className = 'list-row';
-            r.innerHTML = `<span>${rawData.name_map[id]||"名單內"}</span><span style="font-family:monospace; opacity:0.5">${id}</span>`;
+            r.innerHTML = `<span>${rawData.name_map[id]||"未公開姓名"}</span><span style="font-family:monospace; opacity:0.5">${id}</span>`;
             r.onclick = () => { closeModal(); resultsHistory[currentMode] = { ids:[id], crit:[] }; render([id], []); window.scrollTo({top:0, behavior:'smooth'}); };
             body.appendChild(r);
         });
         document.getElementById('modalMask').style.display = 'flex';
     }
+
+    function openHelp() {
+        document.getElementById('m-title').innerText = "系統說明與資料來源";
+        document.getElementById('m-sub').innerText = "115 學年度聯合查榜服務";
+        document.getElementById('m-stats').innerHTML = "";
+        document.getElementById('modalBody').innerHTML = `
+            <div class="help-content">
+                <p><b>1. 資料來源：</b><br>本系統所有數據均來自「大學甄選入學委員會 (CAC)」及「技專校院招生委員會聯合會 (JCTV)」之官方公開產製網頁。</p>
+                <p><b>2. 姓名連結原理：</b><br>由於普通大學端（甄選會）通常不直接公開考生姓名。本系統係透過<b>科技大學（科大端）</b>公開之准考證與姓名對應關係，反向推導並串連至普大錄取名單，以達成跨校系查榜。</p>
+                <p><b>3. 為何顯示「未公開姓名」？</b><br>若該考生僅報名普通大學，或其准考證號碼<b>未出現在科大的錄取名單中</b>，系統將無法獲取對應姓名，故顯示為「未公開姓名」。</p>
+                <hr style="opacity:0.2; margin:20px 0;">
+                <p style="font-size:13px; color:gray; text-align:center;">本系統僅供學術交流與參考使用，正式結果請以各招生委員會公告為準。</p>
+            </div>
+        `;
+        document.getElementById('modalMask').style.display = 'flex';
+    }
+
     function closeModal() { document.getElementById('modalMask').style.display = 'none'; }
 
     function updateUrl() {
