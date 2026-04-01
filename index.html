@@ -3,117 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>115學年度聯合查榜系統</title>
+    <title>115學年度聯合查榜系統 - Material 3 Custom</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
     <style>
-        :root { --primary: #0284c7; --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; }
-        body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; line-height: 1.5; min-height: 100vh; }
-        .container { max-width: 950px; margin: 0 auto; width: 100%; }
+        :root {
+            --md-sys-color-primary: #0061a4;
+            --md-sys-color-on-primary: #ffffff;
+            --md-sys-color-primary-container: #d1e4ff;
+            --md-sys-color-on-primary-container: #001d36;
+            --md-sys-color-secondary: #535f70;
+            --md-sys-color-surface: #fdfcff;
+            --md-sys-color-on-surface: #1a1c1e;
+            --md-sys-color-surface-container: #f0f3f8;
+            --md-sys-color-surface-container-high: #e7e9ee;
+            --md-sys-color-outline: #73777f;
+            --md-sys-color-outline-variant: #c3c7cf;
+            --md-sys-color-error: #ba1a1a;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            margin: 0; padding: 0; line-height: 1.5;
+            display: flex; justify-content: center;
+        }
+
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+
+        /* Loading Screen */
+        #loading-overlay {
+            position: fixed; inset: 0; background: var(--md-sys-color-surface);
+            z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .m3-loader {
+            width: 48px; height: 48px; border: 4px solid var(--md-sys-color-primary-container);
+            border-top: 4px solid var(--md-sys-color-primary); border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .container { max-width: 850px; width: 100%; padding: 24px 16px; }
+
+        /* Header */
+        header { text-align: center; margin-bottom: 32px; cursor: pointer; user-select: none; }
+        header h1 { font-size: 28px; font-weight: 700; color: var(--md-sys-color-primary); margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        header p { font-size: 14px; color: var(--md-sys-color-secondary); margin-top: 4px; }
+
+        /* Tabs */
+        .tabs-container {
+            display: flex; background: var(--md-sys-color-surface-container);
+            padding: 4px; border-radius: 100px; margin-bottom: 24px;
+        }
+        .tab-btn {
+            flex: 1; border: none; background: none; padding: 12px; border-radius: 100px;
+            font-weight: 500; cursor: pointer; color: var(--md-sys-color-secondary);
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: var(--transition);
+        }
+        .tab-btn.active { background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); }
+
+        /* Search Card */
+        .search-card { background: var(--md-sys-color-surface-container); border-radius: 28px; padding: 24px; margin-bottom: 24px; }
+        .input-group { margin-bottom: 16px; position: relative; }
+        .label-text { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--md-sys-color-secondary); }
         
-        header { text-align: center; margin-bottom: 20px; }
-        header h1 { font-size: 26px; color: var(--primary); margin: 0; }
+        input, select {
+            width: 100%; padding: 14px 16px; border: 1px solid var(--md-sys-color-outline);
+            border-radius: 14px; background: var(--md-sys-color-surface);
+            font-size: 16px; box-sizing: border-box; transition: var(--transition);
+        }
+        input:focus { outline: 2px solid var(--md-sys-color-primary); border-color: transparent; }
 
-        .mode-switcher { display: flex; background: #e2e8f0; padding: 4px; border-radius: 12px; margin-bottom: 20px; }
-        .mode-btn { flex: 1; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; background: transparent; transition: 0.2s; }
-        .mode-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        /* Advanced Rows */
+        .adv-row { display: grid; grid-template-columns: 100px 1fr 1.2fr 48px; gap: 12px; margin-bottom: 12px; align-items: flex-end; }
+        @media (max-width: 600px) { .adv-row { grid-template-columns: 1fr; } .btn-remove { width: 100%; } }
 
-        .search-card { background: var(--card); padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-top: 6px solid var(--primary); margin-bottom: 20px; }
-        .input-label { display: block; font-size: 13px; font-weight: bold; color: #64748b; margin-bottom: 8px; }
-        input, select { border: 2px solid #e2e8f0; padding: 10px; border-radius: 10px; font-size: 14px; outline: none; width: 100%; box-sizing: border-box; background: #fff; }
-        
-        .adv-area { display: none; flex-direction: column; gap: 15px; }
-        .adv-area.active { display: flex; }
+        /* Buttons */
+        .btn-main {
+            background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary);
+            border: none; padding: 18px; border-radius: 100px; width: 100%;
+            font-weight: 600; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: var(--transition);
+        }
+        .btn-main:disabled { background: var(--md-sys-color-outline-variant); cursor: not-allowed; }
+        .btn-add {
+            background: none; border: 1.5px dashed var(--md-sys-color-outline);
+            color: var(--md-sys-color-primary); padding: 12px; border-radius: 14px;
+            width: 100%; margin-top: 8px; cursor: pointer; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 4px;
+        }
+        .btn-remove { background: #fde2e1; color: var(--md-sys-color-error); border: none; height: 50px; border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        .admission-list { display: flex; flex-direction: column; gap: 10px; }
-        .admission-row { display: grid; grid-template-columns: 85px 1fr 1fr 40px; gap: 8px; align-items: center; background: #f8fafc; padding: 10px; border-radius: 12px; border: 1px solid #e2e8f0; }
-        
-        .remove-btn { background: #fee2e2; color: #ef4444; border: none; height: 38px; width: 38px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 18px; }
-        .add-btn { background: white; border: 2px dashed #cbd5e1; color: #64748b; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 13px; width: 100%; margin-top: 5px; }
+        /* Results */
+        .result-item { background: var(--md-sys-color-surface-container); border-radius: 24px; margin-bottom: 12px; border: 1px solid transparent; }
+        .result-item.active { border-color: var(--md-sys-color-primary-container); background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .result-header { padding: 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .result-content { display: none; padding: 0 20px 20px; }
+        .result-item.active .result-content { display: block; }
 
-        .main-btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 12px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; font-size: 16px; }
-        .main-btn:disabled { background: #cbd5e1; }
+        .dept-card {
+            background: var(--md-sys-color-surface); padding: 16px; border-radius: 20px; margin-bottom: 10px;
+            border: 1px solid var(--md-sys-color-outline-variant); display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; transition: var(--transition);
+        }
+        .dept-card.match { border-left: 6px solid #f59e0b; background: #fffbeb; }
 
-        .student-wrapper { margin-bottom: 12px; border-radius: 15px; overflow: hidden; background: #fff; border: 1px solid #e2e8f0; }
-        .student-header { background: #f8fafc; padding: 15px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .student-wrapper.active .student-header { background: linear-gradient(135deg, #0284c7, #075985); color: white; }
-        .student-content { display: none; padding: 15px; background: #fff; }
-        .student-wrapper.active .student-content { display: block; }
-        
-        .site-info { font-size: 12px; opacity: 0.8; margin-top: 4px; display: inline-block; background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 6px; }
-        .student-wrapper.active .site-info { background: rgba(255,255,255,0.2); }
+        .badge-tag { font-size: 11px; padding: 3px 10px; border-radius: 8px; font-weight: bold; margin-bottom: 6px; display: inline-block; }
+        .badge-cac { background: #e0f2fe; color: #0369a1; }
+        .badge-jctv { background: #dcfce7; color: #166534; }
 
-        .school-card { background: #fff; padding: 12px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
-        .school-card:hover { border-color: var(--primary); background: #f0f9ff; }
-        .card-hit { border-left: 6px solid #f59e0b; background: #fffbeb; }
-        
-        .tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-bottom: 4px; display: inline-block; }
-        .tag-cac { background: #e0f2fe; color: #0369a1; }
-        .tag-jctv { background: #dcfce7; color: #166534; }
+        .info-pill { font-size: 12px; color: var(--md-sys-color-secondary); background: #f1f3f4; padding: 4px 10px; border-radius: 8px; display: flex; align-items: center; gap: 4px; }
 
-        .info-grid { display: flex; gap: 6px; font-size: 11px; color: #64748b; margin-top: 4px; flex-wrap: wrap; }
-        .info-item { background: #f1f5f9; padding: 1px 6px; border-radius: 4px; border: 1px solid #e2e8f0; }
-
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(5px); z-index: 999; }
-        .modal-content { background: white; width: 92%; max-width: 450px; margin: 8vh auto; border-radius: 24px; display: flex; flex-direction: column; height: 75vh; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .modal-header { padding: 20px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-start; }
-        
-        .stats-container { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-        .stat-badge { background: #f0f9ff; color: #0369a1; padding: 5px 12px; border-radius: 8px; font-size: 13px; font-weight: bold; border: 1px solid #bae6fd; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        
-        .modal-body { padding: 10px; overflow-y: auto; flex: 1; }
-        .list-item { display: flex; justify-content: space-between; padding: 14px 15px; border-bottom: 1px solid #f8fafc; cursor: pointer; }
-        .list-item:hover { background: #f1f5f9; color: var(--primary); }
+        /* Modal */
+        .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px); }
+        .modal { background: var(--md-sys-color-surface); width: 92%; max-width: 480px; border-radius: 32px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
+        .modal-header { padding: 24px; border-bottom: 1px solid var(--md-sys-color-outline-variant); }
+        .modal-body { padding: 8px; overflow-y: auto; flex: 1; }
+        .list-row { padding: 14px 24px; border-radius: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .list-row:hover { background: var(--md-sys-color-surface-container-high); }
     </style>
 </head>
 <body>
 
+<div id="loading-overlay">
+    <div class="m3-loader"></div>
+    <p style="margin-top: 16px; font-weight: 500;">同步 115 學年度數據...</p>
+</div>
+
 <div class="container">
-    <header>
-        <h1>🎓 115學年度聯合查榜系統</h1>
-        <div id="dataStatus" style="font-size:12px; color:#64748b; margin-top:5px;">🔄 正在連線同步數據...</div>
+    <header onclick="resetAll()">
+        <h1><span class="material-symbols-outlined" style="font-size: 32px;">history_edu</span> 115 聯合查榜</h1>
+        <p id="data-status">正在連線資料庫...</p>
     </header>
 
-    <div class="mode-switcher">
-        <button id="btn-norm" class="mode-btn active" onclick="switchMode('normal')">一般查詢</button>
-        <button id="btn-adv" class="mode-btn" onclick="switchMode('adv')">反向推查 (不限考場/志願)</button>
+    <div class="tabs-container">
+        <button id="tab-normal" class="tab-btn active" onclick="switchMode('normal')">
+            <span class="material-symbols-outlined">person_search</span> 一般查詢
+        </button>
+        <button id="tab-adv" class="tab-btn" onclick="switchMode('adv')">
+            <span class="material-symbols-outlined">manage_search</span> 反向推查
+        </button>
     </div>
 
     <div class="search-card">
-        <div id="norm-section">
-            <label class="input-label">准考證號或姓名 (按下Enter 送出)</label>
-            <input type="text" id="userInput" placeholder="例如: 葉學群 或 11000101" onkeypress="if(event.key==='Enter') handleSearchClick(true)">
+        <div id="section-normal">
+            <div class="input-group">
+                <label class="label-text"><span class="material-symbols-outlined" style="font-size:18px;">search</span> 考生姓名或准考證</label>
+                <input type="text" id="userInput" placeholder="例如：葉學群 或 11000101" onkeypress="if(event.key==='Enter') startSearch()">
+            </div>
         </div>
 
-        <div id="adv-section" class="adv-area">
-            <div>
-                <label class="input-label">1. 選擇考場</label>
+        <div id="section-adv" style="display: none;">
+            <div class="input-group">
+                <label class="label-text"><span class="material-symbols-outlined" style="font-size:18px;">location_on</span> 1. 考場範圍</label>
                 <select id="siteSelect">
-                    <option value="">-- 請選擇考場範圍 --</option>
-                    <option value="ALL_SITES" style="font-weight:bold; color:var(--primary);">🌏不限定考場 (全台搜尋)</option>
+                    <option value="ALL">🌏 不限考場 (全台搜尋)</option>
                 </select>
             </div>
-            <div>
-                <label class="input-label">2. 錄取志願 (輸入代碼會自動填入校系)</label>
-                <div id="admissionList" class="admission-list"></div>
-                <button type="button" class="add-btn" onclick="addAdmissionRow()">+ 新增志願組 (最多 12 組)</button>
-            </div>
+            <label class="label-text"><span class="material-symbols-outlined" style="font-size:18px;">account_balance</span> 2. 志願代碼/校系搜尋</label>
+            <div id="adv-list"></div>
+            <button class="btn-add" onclick="addAdvRow()">
+                <span class="material-symbols-outlined">add_circle</span> 新增校系
+            </button>
         </div>
 
-        <button id="searchBtn" class="main-btn" onclick="handleSearchClick(true)" disabled>立即查詢數據</button>
+        <button id="searchBtn" class="btn-main" onclick="startSearch()" style="margin-top: 16px;" disabled>
+            <span class="material-symbols-outlined">bolt</span> 執行搜尋
+        </button>
     </div>
 
-    <div id="resultArea"></div>
+    <div id="resultsArea"></div>
 </div>
 
-<div id="deptModal" class="modal" onclick="closeModal()">
-    <div class="modal-content" onclick="event.stopPropagation()">
+<!-- Modal -->
+<div id="modalMask" class="modal-mask" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <div>
-                <h3 id="modalTitle" style="margin:0; font-size:18px;">系組名單</h3>
-                <div id="modalSubTitle" style="color:#64748b; font-size:14px; margin-top:4px;"></div>
-                <div class="stats-container" id="modalStats"></div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <h3 id="m-title" style="margin:0; font-size:20px;">系組名單</h3>
+                    <p id="m-sub" style="color:var(--md-sys-color-secondary); font-size:14px; margin:4px 0;"></p>
+                </div>
+                <button onclick="closeModal()" style="background:none; border:none; cursor:pointer;"><span class="material-symbols-outlined">close</span></button>
             </div>
-            <button onclick="closeModal()" style="background:none; border:none; color:#94a3b8; font-size:28px; cursor:pointer;">&times;</button>
+            <div id="m-stats" style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;"></div>
         </div>
         <div id="modalBody" class="modal-body"></div>
     </div>
@@ -125,277 +200,241 @@
     const GITHUB_URL = "https://raw.githubusercontent.com/potatosserver/UniCross-115/refs/heads/main/exam_local_db.json";
     const TEST_SITES = [[11000101, 11006036, "臺北市立大同高中"], [11006101, 11009236, "臺北市立建國高中"], [14110101, 14110103, "臺北市立建國高中"], [11009301, 11012736, "臺北市立第一女中"], [11012801, 11016136, "臺北市立西松高中"], [11016201, 11020836, "臺北市立和平高中"], [19110101, 19112608, "國立臺灣大學"], [11020901, 11024836, "國立臺灣師大附中"], [11024901, 11028836, "臺北市立松山高中"], [11028901, 11032836, "臺北市立成淵高中"], [11032901, 11036336, "臺北市立華江高中"], [11036401, 11038836, "國立臺灣師範大學"], [11038901, 11041636, "臺北市立中山女高"], [11041701, 11043617, "臺北市立景美女中"], [11043701, 11047536, "臺北市立百齡高中"], [11047601, 11051136, "臺北市立內湖高中"], [11051201, 11054136, "臺北市立木柵高工"], [11054201, 11056836, "新北市立新店高中"], [11056901, 11060336, "臺北市立陽明高中"], [11060401, 11063336, "臺北市立復興高中"], [11063401, 11068336, "國立華僑高中"], [11068401, 11073523, "新北市立海山高中"], [11073601, 11078536, "新北市立板橋高中"], [11078601, 11083536, "新北市立新莊高中"], [11083601, 11089332, "新北市立丹鳳高中"], [11089401, 11093915, "新北市立新北高中"], [11094001, 11098236, "新北市立三民高中"], [11098301, 11103536, "新北市立永平高中"], [11103601, 11108630, "新北市立錦和高中"], [11108701, 11110136, "新北市立光復高中"], [11110201, 11112716, "國立臺灣海洋大學"], [11112801, 11114936, "國立基隆女中"], [11115001, 11118836, "桃園市立武陵高中"], [11118901, 11123336, "桃園市立陽明高中"], [11123401, 11128236, "桃園市立桃園高中"], [11128301, 11131426, "國立北科大附屬桃園農工"], [11131501, 11135236, "國立中央大學附屬中壢高中"], [11135301, 11139136, "私立復旦高中"], [11139201, 11143036, "私立育達高中"], [11143101, 11146436, "桃園市立平鎮高中"], [11146501, 11149108, "桃園市立大園國際高中"], [11149201, 11152136, "國立新竹高中"], [11152201, 11155936, "國立新竹女中"], [11156001, 11159636, "私立曙光女中"], [11159701, 11163206, "新竹市立香山高中"], [11163301, 11167622, "國立陽明交大附中"], [11167701, 11171730, "國立苗栗高中"], [11171801, 11176036, "臺中市立文華高中"], [11176101, 11181236, "臺中市立臺中二中"], [11181301, 11186836, "臺中市立臺中一中"], [11186901, 11191036, "國立中興大學附中"], [11191101, 11195836, "私立明德高中"], [11195901, 11198016, "靜宜大學"], [11198101, 11201636, "臺中市立清水高中"], [11201701, 11207615, "私立弘文高中"], [11207701, 11212136, "臺中市立臺中女中"], [11212201, 11216326, "臺中市立惠文高中"], [11216401, 11219305, "國立中興高中"], [11219401, 11220836, "私立同德高中"], [11220901, 11223615, "國立彰化師範大學"], [11223701, 11228436, "國立彰化師大附屬高工"], [11228501, 11231419, "國立員林高中"], [11231501, 11233936, "國立員林崇實高工"], [11234001, 11237436, "國立斗六高中"], [11237501, 11240831, "國立虎尾高中"], [11240901, 11246230, "國立嘉義高中"], [11246301, 11250436, "國立嘉義女中"], [11250501, 11253935, "國立臺南一中"], [11254001, 11259036, "國立臺南二中"], [11259101, 11263136, "國立臺南女中"], [11263201, 11267736, "國立家齊高中"], [11267801, 11272936, "私立長榮高中"], [11273001, 11276208, "國立新營高中"], [11276301, 11279019, "國立高雄師範大學"], [11279101, 11281036, "國立高雄師大附中"], [11281101, 11284536, "高雄市立中正高中"], [11284601, 11289236, "國立鳳新高中"], [11289301, 11294636, "私立道明高中"], [11294701, 11299236, "高雄市立高雄高中"], [11299301, 11303736, "高雄市立高雄女中"], [11303801, 11307631, "高雄市立中山高中"], [11307701, 11312236, "高雄市立左營高中"], [11312301, 11314734, "國立屏東大學"], [11314801, 11316436, "國立屏東大學(屏師校區)"], [11316501, 11319836, "國立屏東女中"], [11319901, 11326235, "國立宜蘭大學"], [11326301, 11328436, "國立花蓮高中"], [11328501, 11330514, "國立花蓮女中"], [11330601, 11332810, "國立臺東女中"], [11332901, 11333523, "國立澎湖科技大學"], [11333601, 11334531, "國立金門大學"], [11334601, 11334708, "國立馬祖高中"]];
 
-    let rawData = null, idToIndex = {}, schoolToDepts = {}, codeToDeptMap = {}, rowCounter = 0;
-    let historyResults = { normal: { ids: [], criteria: [] }, adv: { ids: [], criteria: [] } };
-    let currentMode = 'normal';
-
-    function clean(str) { return (str || "").replace(/[\r\n\t\s]+/g, ''); }
+    let rawData = null, idToIndex = {}, schoolDepts = {}, codeToDept = {}, rowIdx = 0, currentMode = 'normal';
+    let resultsHistory = { normal: { ids: [], crit: [] }, adv: { ids: [], crit: [] } };
 
     window.onload = async () => {
         try {
             const res = await fetch(GITHUB_URL);
             rawData = await res.json();
-            
-            for (let t of ['cac', 'jctv']) {
-                const schools = rawData[t] || {};
-                for (let sName in schools) {
-                    if (!schoolToDepts[sName]) schoolToDepts[sName] = { type: t, depts: [] };
-                    for (let dName in schools[sName]) {
-                        const deptInfo = schools[sName][dName];
-                        const ids = deptInfo["錄取名單"] || [];
-                        const dCode = deptInfo["科系代碼"];
-                        schoolToDepts[sName].depts.push(dName);
-                        if(dCode && dCode !== "科大代碼") codeToDeptMap[dCode] = { type: t, school: sName, dept: dName };
-
-                        ids.forEach(id => {
-                            if (!idToIndex[id]) idToIndex[id] = [];
-                            idToIndex[id].push({ 
-                                type: t, school: sName, dept: dName,
-                                code: dCode || "-", quota: deptInfo["招生名額"] || "-", date: deptInfo["面試日期"] || "-"
-                            });
-                        });
-                    }
-                }
-            }
-
-            // 初始化 UI
-            const sl = document.getElementById('schoolList');
-            Object.keys(schoolToDepts).sort().forEach(s => {
-                const opt = document.createElement('option'); opt.value = s; sl.appendChild(opt);
-            });
-            const ss = document.getElementById('siteSelect');
-            [...new Set(TEST_SITES.map(x => x[2]))].sort().forEach(v => {
-                const o = document.createElement('option'); o.value = v; o.innerText = v; ss.appendChild(o);
-            });
-
-            document.getElementById('dataStatus').innerText = "✅ 數據同步成功";
-            document.getElementById('searchBtn').disabled = false;
-            
-            // 讀取網址參數並自動搜尋
+            processData();
+            initUI();
             handleUrlParams();
-
-        } catch (e) { document.getElementById('dataStatus').innerText = "❌ 資料庫載入失敗"; console.error(e); }
+            document.getElementById('loading-overlay').style.display = 'none';
+        } catch (e) {
+            document.getElementById('data-status').innerText = "❌ 資料庫連線失敗";
+            console.error(e);
+        }
     };
 
-    function handleUrlParams() {
-        const params = new URLSearchParams(window.location.search);
-        const mode = params.get('m');
-        const query = params.get('q');
-        const site = params.get('site');
-        const codes = params.get('codes');
-
-        if (mode === 'adv' || codes) {
-            switchMode('adv');
-            if (site) document.getElementById('siteSelect').value = site;
-            if (codes) {
-                const codeArr = codes.split(',');
-                document.getElementById('admissionList').innerHTML = ""; // 清空預設
-                codeArr.forEach(c => {
-                    addAdmissionRow(c);
-                });
-            } else {
-                addAdmissionRow();
+    function processData() {
+        ['cac', 'jctv'].forEach(type => {
+            const schs = rawData[type] || {};
+            for (let s in schs) {
+                if (!schoolDepts[s]) schoolDepts[s] = { type, depts: [] };
+                for (let d in schs[s]) {
+                    const info = schs[s][d];
+                    const code = info["科系代碼"];
+                    const count = (info["錄取名單"] || []).length;
+                    schoolDepts[s].depts.push({ name: d, code });
+                    if (code && code !== "科大代碼") codeToDept[code] = { type, s, d };
+                    
+                    (info["錄取名單"] || []).forEach(id => {
+                        if (!idToIndex[id]) idToIndex[id] = [];
+                        idToIndex[id].push({ type, s, d, code, quota: info["招生名額"], count, date: info["面試日期"] });
+                    });
+                }
             }
-            if (site || codes) handleSearchClick(false);
-        } else {
-            addAdmissionRow();
-            if (query) {
-                document.getElementById('userInput').value = query;
-                handleSearchClick(false);
-            }
-        }
+        });
     }
 
-    function addAdmissionRow(initialCode = "") {
-        const container = document.getElementById('admissionList');
-        if (container.children.length >= 12) return;
-        rowCounter++;
-        const dlId = `depts_${rowCounter}`;
-        const row = document.createElement('div');
-        row.className = 'admission-row';
-        row.innerHTML = `
-            <input type="text" class="code-input" placeholder="代碼..." maxlength="6" value="${initialCode}" oninput="onCodeInput(this, '${dlId}')">
-            <input type="text" class="sch-input" list="schoolList" placeholder="校名..." oninput="onRowSchoolInput(this, '${dlId}')">
-            <div>
-                <input type="text" class="dept-input" list="${dlId}" placeholder="系組搜尋..." disabled>
-                <datalist id="${dlId}"></datalist>
-            </div>
-            <button type="button" class="remove-btn" onclick="this.parentElement.remove()">×</button>
-        `;
-        container.appendChild(row);
-        if(initialCode) onCodeInput(row.querySelector('.code-input'), dlId);
-    }
-
-    function onCodeInput(codeEl, dlId) {
-        const val = codeEl.value.trim();
-        if(val.length === 6 && codeToDeptMap[val]) {
-            const row = codeEl.parentElement;
-            const target = codeToDeptMap[val];
-            row.querySelector('.sch-input').value = target.school;
-            const deptInput = row.querySelector('.dept-input');
-            deptInput.value = target.dept;
-            updateDeptList(row.querySelector('.sch-input'), dlId);
-            deptInput.disabled = false;
-        }
-    }
-
-    function onRowSchoolInput(schInput, dlId) { updateDeptList(schInput, dlId); }
-
-    function updateDeptList(schInput, dlId) {
-        const sName = schInput.value;
-        const row = schInput.parentElement;
-        const deptInput = row.querySelector('.dept-input');
-        const dl = document.getElementById(dlId);
-        dl.innerHTML = "";
-        if (schoolToDepts[sName]) {
-            schoolToDepts[sName].depts.sort().forEach(d => {
-                const opt = document.createElement('option'); opt.value = d; dl.appendChild(opt);
-            });
-            deptInput.disabled = false;
-        } else { deptInput.disabled = true; }
+    function initUI() {
+        const dl = document.getElementById('schoolList');
+        Object.keys(schoolDepts).sort().forEach(s => {
+            const o = document.createElement('option'); o.value = s; dl.appendChild(o);
+        });
+        const ss = document.getElementById('siteSelect');
+        [...new Set(TEST_SITES.map(x => x[2]))].sort().forEach(v => {
+            const o = document.createElement('option'); o.value = v; o.innerText = v; ss.appendChild(o);
+        });
+        document.getElementById('data-status').innerText = "✅ 115 數據已同步";
+        document.getElementById('searchBtn').disabled = false;
     }
 
     function switchMode(m) {
         currentMode = m;
-        document.getElementById('btn-norm').className = `mode-btn ${m==='normal'?'active':''}`;
-        document.getElementById('btn-adv').className = `mode-btn ${m==='adv'?'active':''}`;
-        document.getElementById('norm-section').style.display = m==='normal'?'block':'none';
-        document.getElementById('adv-section').className = `adv-area ${m==='adv'?'active':''}`;
-        render(historyResults[m].ids, historyResults[m].criteria);
+        document.getElementById('tab-normal').classList.toggle('active', m === 'normal');
+        document.getElementById('tab-adv').classList.toggle('active', m === 'adv');
+        document.getElementById('section-normal').style.display = m === 'normal' ? 'block' : 'none';
+        document.getElementById('section-adv').style.display = m === 'adv' ? 'block' : 'none';
+        
+        const hist = resultsHistory[m];
+        render(hist.ids, hist.crit);
+        
+        if (m === 'adv' && !document.getElementById('adv-list').children.length) addAdvRow();
+        updateUrl();
     }
 
-    function updateUrlState() {
-        const params = new URLSearchParams();
+    function addAdvRow(initCode = "") {
+        rowIdx++;
+        const container = document.getElementById('adv-list');
+        const dlId = `dl-${rowIdx}`;
+        const div = document.createElement('div');
+        div.className = 'adv-row';
+        div.id = `adv-r-${rowIdx}`;
+        div.innerHTML = `
+            <input type="text" class="code-in" placeholder="代碼" maxlength="6" value="${initCode}" oninput="handleCodeIn(this, ${rowIdx})">
+            <input type="text" class="sch-in" list="schoolList" placeholder="校名" oninput="handleSchIn(this, ${rowIdx})">
+            <div>
+                <input type="text" class="dept-in" list="${dlId}" placeholder="系組名" oninput="handleDeptIn(this, ${rowIdx})">
+                <datalist id="${dlId}"></datalist>
+            </div>
+            <button class="btn-remove" onclick="this.parentElement.remove(); updateUrl();"><span class="material-symbols-outlined">delete_outline</span></button>
+        `;
+        container.appendChild(div);
+        if (initCode) handleCodeIn(div.querySelector('.code-in'), rowIdx);
+    }
+
+    function handleCodeIn(el, id) {
+        const c = el.value.trim();
+        if (codeToDept[c]) {
+            const { s, d } = codeToDept[c];
+            const row = document.getElementById(`adv-r-${id}`);
+            row.querySelector('.sch-in').value = s;
+            updateDeptDl(row, s);
+            row.querySelector('.dept-in').value = d;
+            updateUrl();
+        }
+    }
+    function handleSchIn(el, id) { updateDeptDl(document.getElementById(`adv-r-${id}`), el.value); }
+    function handleDeptIn(el, id) {
+        const row = document.getElementById(`adv-r-${id}`), s = row.querySelector('.sch-in').value;
+        if (schoolDepts[s]) {
+            const f = schoolDepts[s].depts.find(x => x.name === el.value);
+            if (f) { row.querySelector('.code-in').value = f.code; updateUrl(); }
+        }
+    }
+    function updateDeptDl(row, s) {
+        const dl = row.querySelector('datalist'); dl.innerHTML = "";
+        if (schoolDepts[s]) schoolDepts[s].depts.forEach(x => { const o = document.createElement('option'); o.value = x.name; dl.appendChild(o); });
+    }
+
+    function startSearch() {
+        let idsSet = new Set(), crit = [];
         if (currentMode === 'normal') {
             const q = document.getElementById('userInput').value.trim();
-            if (q) params.set('q', q);
-        } else {
-            params.set('m', 'adv');
-            const site = document.getElementById('siteSelect').value;
-            if (site) params.set('site', site);
-            const codes = Array.from(document.querySelectorAll('.code-input'))
-                               .map(el => el.value.trim())
-                               .filter(v => v.length === 6);
-            if (codes.length > 0) params.set('codes', codes.join(','));
-        }
-        const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-        window.history.replaceState({}, '', newUrl);
-    }
-
-    function handleSearchClick(shouldUpdateUrl = true) {
-        let finalIdsSet = new Set(), criteria = [];
-        if (currentMode === 'normal') {
-            const q = clean(document.getElementById('userInput').value);
             if (!q) return;
-            if (/^\d+$/.test(q)) { if (idToIndex[q]) finalIdsSet.add(q); } 
+            if (/^\d+$/.test(q)) { if (idToIndex[q]) idsSet.add(q); }
             else {
-                const targetMask = maskName(q);
-                for (let id in rawData.name_map) {
-                    if (maskName(clean(rawData.name_map[id])) === targetMask) finalIdsSet.add(id);
-                }
+                const mask = (n) => n.length < 2 ? n : n[0] + 'Ｏ' + (n.length > 2 ? n[n.length - 1] : '');
+                const t = mask(q);
+                for (let id in rawData.name_map) if (mask(rawData.name_map[id]) === t) idsSet.add(id);
             }
         } else {
             const site = document.getElementById('siteSelect').value;
-            if (!site) { alert("請先選擇考場範圍"); return; }
-            
-            const isAllSites = site === "ALL_SITES";
-            const ranges = isAllSites ? [] : TEST_SITES.filter(s => s[2] === site);
-            
-            document.querySelectorAll('.admission-row').forEach(row => {
-                const s = row.querySelector('.sch-input').value, d = row.querySelector('.dept-input').value;
-                if (s && d && schoolToDepts[s]) {
-                    const typeKey = schoolToDepts[s].type;
-                    const ids = rawData[typeKey][s][d]["錄取名單"] || [];
-                    criteria.push({ school: s, dept: d });
-                    ids.forEach(id => { 
-                        if (isAllSites || ranges.some(r => id >= r[0] && id <= r[1])) {
-                            finalIdsSet.add(id); 
-                        }
-                    });
+            const ranges = site === "ALL" ? [] : TEST_SITES.filter(x => x[2] === site);
+            document.querySelectorAll('.adv-row').forEach(r => {
+                const s = r.querySelector('.sch-in').value, d = r.querySelector('.dept-in').value;
+                if (s && d && schoolDepts[s]) {
+                    crit.push({ s, d });
+                    const list = rawData[schoolDepts[s].type][s][d]["錄取名單"] || [];
+                    list.forEach(id => { if (site === "ALL" || ranges.some(x => id >= x[0] && id <= x[1])) idsSet.add(id); });
                 }
             });
         }
-        let results = Array.from(finalIdsSet);
-        historyResults[currentMode] = { ids: results, criteria: criteria };
-        render(results, criteria);
-        if (shouldUpdateUrl) updateUrlState();
+        const finalIds = Array.from(idsSet);
+        resultsHistory[currentMode] = { ids: finalIds, crit: crit };
+        render(finalIds, crit);
+        updateUrl();
     }
 
-    function maskName(n) { n = clean(n); return (n.length < 2 || n.includes('Ｏ')) ? n : n[0] + 'Ｏ' + (n.length > 2 ? n[n.length - 1] : ''); }
-    function getSiteName(id) {
-        const val = parseInt(id);
-        const match = TEST_SITES.find(s => val >= s[0] && val <= s[1]);
-        return match ? match[2] : "未知考場";
-    }
-
-    function render(ids, criteria) {
-        const area = document.getElementById('resultArea');
-        area.innerHTML = "";
-        if (ids.length === 0) {
-            if (document.getElementById('userInput').value || document.querySelectorAll('.admission-row').length > 0) {
-                area.innerHTML = "<div style='text-align:center; padding:40px; color:#64748b;'>查無符合條件的資料</div>";
-            }
-            return;
-        }
+    function render(ids, crit) {
+        const area = document.getElementById('resultsArea');
+        area.innerHTML = ids.length ? "" : (resultsHistory[currentMode].crit.length || document.getElementById('userInput').value ? "<div style='text-align:center; padding:40px; color:#64748b;'>無符合條件的考生</div>" : "");
+        
         ids.forEach(id => {
             const wrap = document.createElement('div');
-            wrap.className = `student-wrapper ${ids.length <= 1 ? 'active' : ''}`;
-            const recs = idToIndex[id] || [], siteName = getSiteName(id);
-            let html = recs.map(r => {
-                const isMatch = criteria.some(c => c.school === r.school && c.dept === r.dept);
+            wrap.className = `result-item ${ids.length === 1 ? 'active' : ''}`;
+            const site = TEST_SITES.find(x => id >= x[0] && id <= x[1]);
+            const html = (idToIndex[id] || []).map(r => {
+                const isMatch = crit.some(c => c.s === r.s && c.d === r.d);
+                const isCac = r.type === 'cac';
                 return `
-                <div class="school-card ${isMatch ? 'card-hit' : ''}" onclick="openDeptModal('${r.type}','${r.school}','${r.dept}')">
+                <div class="dept-card ${isMatch ? 'match' : ''}" onclick="openModal('${r.type}','${r.s}','${r.d}')">
                     <div>
-                        <span class="tag ${r.type==='cac'?'tag-cac':'tag-jctv'}">${r.type==='cac'?'普大':'科大'}</span>
-                        <div style="font-weight:bold;">${r.school}</div>
-                        <div style="font-size:13px; color:#64748b;">${r.dept}</div>
-                        <div class="info-grid">
-                            <span class="info-item"># ${r.code}</span>
-                            ${r.type==='cac' ? `<span class="info-item">名額: ${r.quota}</span><span class="info-item">📅 ${r.date}</span>` : ''}
+                        <span class="badge-tag badge-${r.type}">${isCac ? '普通大學' : '科技大學'}</span>
+                        <div style="font-weight:700;">${r.s}</div>
+                        <div style="font-size:14px; opacity:0.8;">${r.d}</div>
+                        <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
+                            <span class="info-pill"><span class="material-symbols-outlined" style="font-size:14px;">fingerprint</span> ${r.code}</span>
+                            ${isCac ? `<span class="info-pill"><span class="material-symbols-outlined" style="font-size:14px;">groups</span> 名額: ${r.quota}</span>` : ''}
+                            <span class="info-pill"><span class="material-symbols-outlined" style="font-size:14px;">how_to_reg</span> 通過篩選數: ${r.count}</span>
+                            ${isCac ? `<span class="info-pill"><span class="material-symbols-outlined" style="font-size:14px;">event</span> ${r.date}</span>` : ''}
                         </div>
                     </div>
-                    <span>❯</span>
+                    <span class="material-symbols-outlined" style="color:var(--md-sys-color-primary)">chevron_right</span>
                 </div>`;
             }).join('');
+
             wrap.innerHTML = `
-                <div class="student-header" onclick="this.parentElement.classList.toggle('active')">
-                    <div><b>${clean(rawData.name_map[id]) || "(未公開姓名)"}</b><br><small>號碼: ${id}</small><br><div class="site-info">考場： ${siteName}</div></div>
-                    <span style="font-size:12px;">▼ 詳情</span>
+                <div class="result-header" onclick="this.parentElement.classList.toggle('active')">
+                    <div>
+                        <div style="font-size:18px; font-weight:700;">${rawData.name_map[id] || "未公開姓名"}</div>
+                        <div style="font-size:12px; opacity:0.6;">准考證: ${id}</div>
+                        <div style="font-size:11px; background:#e8eaed; padding:2px 8px; border-radius:6px; margin-top:4px; display:inline-block;">${site ? site[2] : '未知考場'}</div>
+                    </div>
+                    <span class="material-symbols-outlined">expand_more</span>
                 </div>
-                <div class="student-content">${html}</div>
+                <div class="result-content">${html}</div>
             `;
             area.appendChild(wrap);
         });
     }
 
-    function openDeptModal(type, school, dept) {
-        const deptObj = rawData[type][school][dept];
-        const ids = deptObj["錄取名單"] || [];
-        document.getElementById('modalTitle').innerText = dept;
-        document.getElementById('modalSubTitle').innerText = school;
-        const statsArea = document.getElementById('modalStats');
-        statsArea.innerHTML = `
-            <div class="stat-badge">📊 代碼: ${deptObj["科系代碼"]}</div>
-            <div class="stat-badge">名額: ${deptObj["招生名額"] || "-"}</div>
-            <div class="stat-badge">通過篩選數: ${ids.length}</div>
+    function openModal(t, s, d) {
+        const obj = rawData[t][s][d], ids = obj["錄取名單"] || [];
+        const isCac = t === 'cac';
+        document.getElementById('m-title').innerText = d;
+        document.getElementById('m-sub').innerText = `${s} (#${obj["科系代碼"]})`;
+        document.getElementById('m-stats').innerHTML = `
+            ${isCac ? `<span class="info-pill" style="background:var(--md-sys-color-primary-container)"><span class="material-symbols-outlined" style="font-size:14px;">groups</span> 招生名額: ${obj["招生名額"]||'-'}</span>` : ''}
+            <span class="info-pill" style="background:var(--md-sys-color-primary-container)"><span class="material-symbols-outlined" style="font-size:14px;">how_to_reg</span> 通過篩選數: ${ids.length}</span>
         `;
-        const body = document.getElementById('modalBody');
-        body.innerHTML = "";
+        const body = document.getElementById('modalBody'); body.innerHTML = "";
         ids.forEach(id => {
-            const div = document.createElement('div');
-            div.className = 'list-item';
-            div.innerHTML = `<span>${clean(rawData.name_map[id]) || "(名單中)"}</span><span style="color:#94a3b8; font-family:monospace">${id}</span>`;
-            div.onclick = () => { 
-                closeModal(); 
-                historyResults[currentMode] = { ids: [id], criteria: [] };
-                render([id], []); 
-                window.scrollTo({top:0, behavior:'smooth'}); 
-            };
-            body.appendChild(div);
+            const r = document.createElement('div'); r.className = 'list-row';
+            r.innerHTML = `<span>${rawData.name_map[id]||"名單內"}</span><span style="font-family:monospace; opacity:0.5">${id}</span>`;
+            r.onclick = () => { closeModal(); resultsHistory[currentMode] = { ids:[id], crit:[] }; render([id], []); window.scrollTo({top:0, behavior:'smooth'}); };
+            body.appendChild(r);
         });
-        document.getElementById('deptModal').style.display = 'block';
+        document.getElementById('modalMask').style.display = 'flex';
     }
-    function closeModal() { document.getElementById('deptModal').style.display = 'none'; }
+    function closeModal() { document.getElementById('modalMask').style.display = 'none'; }
+
+    function updateUrl() {
+        const p = new URLSearchParams();
+        if (currentMode === 'normal') {
+            const q = document.getElementById('userInput').value.trim(); if (q) p.set('q', q);
+        } else {
+            p.set('m', 'adv'); 
+            const site = document.getElementById('siteSelect').value; if (site !== "ALL") p.set('site', site);
+            const cs = Array.from(document.querySelectorAll('.code-in')).map(x => x.value).filter(v => v.length === 6);
+            if (cs.length) p.set('codes', cs.join(','));
+        }
+        window.history.replaceState({}, '', window.location.pathname + (p.toString() ? '?' + p.toString() : ''));
+    }
+
+    function handleUrlParams() {
+        const p = new URLSearchParams(window.location.search);
+        if (p.get('m') === 'adv' || p.get('codes')) {
+            switchMode('adv');
+            if (p.get('site')) document.getElementById('siteSelect').value = p.get('site');
+            if (p.get('codes')) { document.getElementById('adv-list').innerHTML = ""; p.get('codes').split(',').forEach(c => addAdvRow(c)); startSearch(); }
+        } else if (p.get('q')) {
+            document.getElementById('userInput').value = p.get('q');
+            startSearch();
+        }
+    }
+
+    function resetAll() {
+        resultsHistory = { normal: { ids: [], crit: [] }, adv: { ids: [], crit: [] } };
+        document.getElementById('userInput').value = "";
+        document.getElementById('adv-list').innerHTML = "";
+        document.getElementById('resultsArea').innerHTML = "";
+        document.getElementById('siteSelect').selectedIndex = 0;
+        switchMode('normal');
+        window.history.replaceState({}, '', window.location.pathname);
+    }
 </script>
 </body>
 </html>
