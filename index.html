@@ -80,7 +80,7 @@
 
     <div class="search-card">
         <div id="norm-section">
-            <label class="input-label">准考證號或姓名 (支援 Enter 送出)</label>
+            <label class="input-label">准考證號或姓名 (按下Enter 送出)</label>
             <input type="text" id="userInput" placeholder="例如: 葉學群 或 11000101" onkeypress="if(event.key==='Enter') handleSearchClick()">
         </div>
 
@@ -89,8 +89,8 @@
                 <label class="input-label">1. 選擇考場</label>
                 <!-- 這裡加入了不限定考場選項 -->
                 <select id="siteSelect">
-                    <option value="">-- 請選擇搜尋範圍 --</option>
-                    <option value="ALL_SITES" style="font-weight:bold; color:var(--primary);">🌏 不限定考場 (全台搜尋)</option>
+                    <option value="">-- 請選擇考場範圍 --</option>
+                    <option value="ALL_SITES" style="font-weight:bold; color:var(--primary);">🌏不限定考場 (全台搜尋)</option>
                 </select>
             </div>
             <div>
