@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>115學年度聯合查榜系統 - Material 3 Custom</title>
+    <title>115學年度聯合查榜系統 - 完整試場版</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
     <style>
@@ -33,7 +33,6 @@
 
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
 
-        /* Loading Screen */
         #loading-overlay {
             position: fixed; inset: 0; background: var(--md-sys-color-surface);
             z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -47,12 +46,10 @@
 
         .container { max-width: 850px; width: 100%; padding: 24px 16px; }
 
-        /* Header */
         header { text-align: center; margin-bottom: 32px; cursor: pointer; user-select: none; }
         header h1 { font-size: 28px; font-weight: 700; color: var(--md-sys-color-primary); margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px; }
         header p { font-size: 14px; color: var(--md-sys-color-secondary); margin-top: 4px; }
 
-        /* Tabs */
         .tabs-container {
             display: flex; background: var(--md-sys-color-surface-container);
             padding: 4px; border-radius: 100px; margin-bottom: 24px;
@@ -65,7 +62,6 @@
         }
         .tab-btn.active { background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); }
 
-        /* Search Card */
         .search-card { background: var(--md-sys-color-surface-container); border-radius: 28px; padding: 24px; margin-bottom: 24px; }
         .input-group { margin-bottom: 16px; position: relative; }
         .label-text { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--md-sys-color-secondary); }
@@ -77,11 +73,9 @@
         }
         input:focus { outline: 2px solid var(--md-sys-color-primary); border-color: transparent; }
 
-        /* Advanced Rows */
         .adv-row { display: grid; grid-template-columns: 100px 1fr 1.2fr 48px; gap: 12px; margin-bottom: 12px; align-items: flex-end; }
         @media (max-width: 600px) { .adv-row { grid-template-columns: 1fr; } .btn-remove { width: 100%; } }
 
-        /* Buttons */
         .btn-main {
             background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary);
             border: none; padding: 18px; border-radius: 100px; width: 100%;
@@ -96,7 +90,6 @@
         }
         .btn-remove { background: #fde2e1; color: var(--md-sys-color-error); border: none; height: 50px; border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        /* Results */
         .result-item { background: var(--md-sys-color-surface-container); border-radius: 24px; margin-bottom: 12px; border: 1px solid transparent; }
         .result-item.active { border-color: var(--md-sys-color-primary-container); background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .result-header { padding: 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
@@ -116,7 +109,6 @@
 
         .info-pill { font-size: 12px; color: var(--md-sys-color-secondary); background: #f1f3f4; padding: 4px 10px; border-radius: 8px; display: flex; align-items: center; gap: 4px; }
 
-        /* Modal */
         .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px); }
         .modal { background: var(--md-sys-color-surface); width: 92%; max-width: 480px; border-radius: 32px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
         .modal-header { padding: 24px; border-bottom: 1px solid var(--md-sys-color-outline-variant); }
@@ -124,7 +116,6 @@
         .list-row { padding: 14px 24px; border-radius: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .list-row:hover { background: var(--md-sys-color-surface-container-high); }
 
-        /* FAB Help */
         .fab-help {
             position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px;
             border-radius: 16px; background: var(--md-sys-color-primary-container);
@@ -132,16 +123,14 @@
             cursor: pointer; display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 900; transition: var(--transition);
         }
-        .fab-help:hover { transform: scale(1.1); background: var(--md-sys-color-primary); color: white; }
-        .help-content { padding: 24px; font-size: 15px; color: var(--md-sys-color-on-surface); }
-        .help-content b { color: var(--md-sys-color-primary); }
+        .help-content { padding: 24px; font-size: 15px; }
     </style>
 </head>
 <body>
 
 <div id="loading-overlay">
     <div class="m3-loader"></div>
-    <p style="margin-top: 16px; font-weight: 500;">同步 115 學年度數據...</p>
+    <p style="margin-top: 16px; font-weight: 500;">同步 115 學年度數據與考場資料...</p>
 </div>
 
 <div class="container">
@@ -193,7 +182,6 @@
     <span class="material-symbols-outlined">help</span>
 </button>
 
-<!-- Modal -->
 <div id="modalMask" class="modal-mask" onclick="closeModal()">
     <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-header">
@@ -214,7 +202,147 @@
 
 <script>
     const GITHUB_URL = "https://raw.githubusercontent.com/potatosserver/UniCross-115/refs/heads/main/exam_local_db.json";
-    const TEST_SITES = [[11000101, 11006036, "臺北市立大同高中"], [11006101, 11009236, "臺北市立建國高中"], [14110101, 14110103, "臺北市立建國高中"], [11009301, 11012736, "臺北市立第一女中"], [11012801, 11016136, "臺北市立西松高中"], [11016201, 11020836, "臺北市立和平高中"], [19110101, 19112608, "國立臺灣大學"], [11020901, 11024836, "國立臺灣師大附中"], [11024901, 11028836, "臺北市立松山高中"], [11028901, 11032836, "臺北市立成淵高中"], [11032901, 11036336, "臺北市立華江高中"], [11036401, 11038836, "國立臺灣師範大學"], [11038901, 11041636, "臺北市立中山女高"], [11041701, 11043617, "臺北市立景美女中"], [11043701, 11047536, "臺北市立百齡高中"], [11047601, 11051136, "臺北市立內湖高中"], [11051201, 11054136, "臺北市立木柵高工"], [11054201, 11056836, "新北市立新店高中"], [11056901, 11060336, "臺北市立陽明高中"], [11060401, 11063336, "臺北市立復興高中"], [11063401, 11068336, "國立華僑高中"], [11068401, 11073523, "新北市立海山高中"], [11073601, 11078536, "新北市立板橋高中"], [11078601, 11083536, "新北市立新莊高中"], [11083601, 11089332, "新北市立丹鳳高中"], [11089401, 11093915, "新北市立新北高中"], [11094001, 11098236, "新北市立三民高中"], [11098301, 11103536, "新北市立永平高中"], [11103601, 11108630, "新北市立錦和高中"], [11108701, 11110136, "新北市立光復高中"], [11110201, 11112716, "國立臺灣海洋大學"], [11112801, 11114936, "國立基隆女中"], [11115001, 11118836, "桃園市立武陵高中"], [11118901, 11123336, "桃園市立陽明高中"], [11123401, 11128236, "桃園市立桃園高中"], [11128301, 11131426, "國立北科大附屬桃園農工"], [11131501, 11135236, "國立中央大學附屬中壢高中"], [11135301, 11139136, "私立復旦高中"], [11139201, 11143036, "私立育達高中"], [11143101, 11146436, "桃園市立平鎮高中"], [11146501, 11149108, "桃園市立大園國際高中"], [11149201, 11152136, "國立新竹高中"], [11152201, 11155936, "國立新竹女中"], [11156001, 11159636, "私立曙光女中"], [11159701, 11163206, "新竹市立香山高中"], [11163301, 11167622, "國立陽明交大附中"], [11167701, 11171730, "國立苗栗高中"], [11171801, 11176036, "臺中市立文華高中"], [11176101, 11181236, "臺中市立臺中二中"], [11181301, 11186836, "臺中市立臺中一中"], [11186901, 11191036, "國立中興大學附中"], [11191101, 11195836, "私立明德高中"], [11195901, 11198016, "靜宜大學"], [11198101, 11201636, "臺中市立清水高中"], [11201701, 11207615, "私立弘文高中"], [11207701, 11212136, "臺中市立臺中女中"], [11212201, 11216326, "臺中市立惠文高中"], [11216401, 11219305, "國立中興高中"], [11219401, 11220836, "私立同德高中"], [11220901, 11223615, "國立彰化師範大學"], [11223701, 11228436, "國立彰化師大附屬高工"], [11228501, 11231419, "國立員林高中"], [11231501, 11233936, "國立員林崇實高工"], [11234001, 11237436, "國立斗六高中"], [11237501, 11240831, "國立虎尾高中"], [11240901, 11246230, "國立嘉義高中"], [11246301, 11250436, "國立嘉義女中"], [11250501, 11253935, "國立臺南一中"], [11254001, 11259036, "國立臺南二中"], [11259101, 11263136, "國立臺南女中"], [11263201, 11267736, "國立家齊高中"], [11267801, 11272936, "私立長榮高中"], [11273001, 11276208, "國立新營高中"], [11276301, 11279019, "國立高雄師範大學"], [11279101, 11281036, "國立高雄師大附中"], [11281101, 11284536, "高雄市立中正高中"], [11284601, 11289236, "國立鳳新高中"], [11289301, 11294636, "私立道明高中"], [11294701, 11299236, "高雄市立高雄高中"], [11299301, 11303736, "高雄市立高雄女中"], [11303801, 11307631, "高雄市立中山高中"], [11307701, 11312236, "高雄市立左營高中"], [11312301, 11314734, "國立屏東大學"], [11314801, 11316436, "國立屏東大學(屏師校區)"], [11316501, 11319836, "國立屏東女中"], [11319901, 11326235, "國立宜蘭大學"], [11326301, 11328436, "國立花蓮高中"], [11328501, 11330514, "國立花蓮女中"], [11330601, 11332810, "國立臺東女中"], [11332901, 11333523, "國立澎湖科技大學"], [11333601, 11334531, "國立金門大學"], [11334601, 11334708, "國立馬祖高中"]];
+    
+    // 考場資料已補全（包含特殊/增置/身障試場號碼段）
+    const TEST_SITES = [
+        [11000101, 11006036, "臺北市立大同高中"],
+        [11006101, 11009236, "臺北市立建國高中"],
+        [14110101, 14110103, "臺北市立建國高中"],
+        [11009301, 11012736, "臺北市立第一女中"],
+        [11012801, 11016136, "臺北市立西松高中"],
+        [11016201, 11020836, "臺北市立和平高中"],
+        [19110101, 19112608, "國立臺灣大學"],
+        [11020901, 11024836, "國立臺灣師大附中"],
+        [11024901, 11028836, "臺北市立松山高中"],
+        [11028901, 11032836, "臺北市立成淵高中"],
+        [11032901, 11036336, "臺北市立華江高中"],
+        [11036401, 11038836, "國立臺灣師範大學"],
+        [19120101, 19121101, "國立臺灣師範大學"],
+        [11038901, 11041636, "臺北市立中山女高"],
+        [11041701, 11043617, "臺北市立景美女中"],
+        [11043701, 11047536, "臺北市立百齡高中"],
+        [11047601, 11051136, "臺北市立內湖高中"],
+        [11051201, 11054136, "臺北市立木柵高工"],
+        [11054201, 11056836, "新北市立新店高中"],
+        [11056901, 11060336, "臺北市立陽明高中"],
+        [11060401, 11063336, "臺北市立復興高中"],
+        [11063401, 11068336, "國立華僑高中"],
+        [19250101, 19250407, "國立華僑高中"],
+        [11068401, 11073523, "新北市立海山高中"],
+        [14250101, 14250104, "新北市立海山高中"],
+        [11073601, 11078536, "新北市立板橋高中"],
+        [19250501, 19251205, "新北市立板橋高中"],
+        [11078601, 11083536, "新北市立新莊高中"],
+        [19251301, 19251507, "新北市立新莊高中"],
+        [11083601, 11089332, "新北市立丹鳳高中"],
+        [14250201, 14250201, "新北市立丹鳳高中"],
+        [19251601, 19251902, "新北市立丹鳳高中"],
+        [11089401, 11093915, "新北市立新北高中"],
+        [14260101, 14260102, "新北市立新北高中"],
+        [19260101, 19260409, "新北市立新北高中"],
+        [11094001, 11098236, "新北市立三民高中"],
+        [11098301, 11103536, "新北市立永平高中"],
+        [14260201, 14260203, "新北市立永平高中"],
+        [19260501, 19260802, "新北市立永平高中"],
+        [11103601, 11108630, "新北市立錦和高中"],
+        [11108701, 11110136, "新北市立光復高中"],
+        [11110201, 11112716, "國立臺灣海洋大學"],
+        [19300101, 19300401, "國立臺灣海洋大學"],
+        [11112801, 11114936, "國立基隆女中"],
+        [11115001, 11118836, "桃園市立武陵高中"],
+        [11118901, 11123336, "桃園市立陽明高中"],
+        [11123401, 11128236, "桃園市立桃園高中"],
+        [11128301, 11131426, "國立北科大附屬桃園農工"],
+        [19310101, 19311001, "國立北科大附屬桃園農工"],
+        [11131501, 11135236, "國立中央大學附屬中壢高中"],
+        [19320101, 19320507, "國立中央大學附屬中壢高中"],
+        [11135301, 11139136, "私立復旦高中"],
+        [11139201, 11143036, "私立育達高中"],
+        [11143101, 11146436, "桃園市立平鎮高中"],
+        [14320101, 14320101, "桃園市立平鎮高中"],
+        [11146501, 11149108, "桃園市立大園國際高中"],
+        [11149201, 11152136, "國立新竹高中"],
+        [17340101, 17340105, "國立新竹高中"],
+        [19340101, 19340708, "國立新竹高中"],
+        [11152201, 11155936, "國立新竹女中"],
+        [14340101, 14340101, "國立新竹女中"],
+        [11156001, 11159636, "私立曙光女中"],
+        [11159701, 11163206, "新竹市立香山高中"],
+        [11163301, 11167622, "國立陽明交大附中"],
+        [11167701, 11171730, "國立苗栗高中"],
+        [19370101, 19370304, "國立苗栗高中"],
+        [11171801, 11176036, "臺中市立文華高中"],
+        [19410101, 19410903, "臺中市立文華高中"],
+        [11176101, 11181236, "臺中市立臺中二中"],
+        [11181301, 11186836, "臺中市立臺中一中"],
+        [11186901, 11191036, "國立中興大學附中"],
+        [11191101, 11195836, "私立明德高中"],
+        [11195901, 11198016, "靜宜大學"],
+        [11198101, 11201636, "臺中市立清水高中"],
+        [19430101, 19430202, "臺中市立清水高中"],
+        [11201701, 11207615, "私立弘文高中"],
+        [14430101, 14430105, "私立弘文高中"],
+        [19430301, 19430305, "私立弘文高中"],
+        [11207701, 11212136, "臺中市立臺中女中"],
+        [11212201, 11216326, "臺中市立惠文高中"],
+        [14440101, 14440102, "臺中市立惠文高中"],
+        [11216401, 11219305, "國立中興高中"],
+        [14460101, 14460101, "國立中興高中"],
+        [19460101, 19460207, "國立中興高中"],
+        [11219401, 11220836, "私立同德高中"],
+        [11220901, 11223615, "國立彰化師範大學"],
+        [19470101, 19470401, "國立彰化師範大學"],
+        [11223701, 11228436, "國立彰化師大附屬高工"],
+        [11228501, 11231419, "國立員林高中"],
+        [14470101, 14470102, "國立員林高中"],
+        [19470501, 19470702, "國立員林高中"],
+        [11231501, 11233936, "國立員林崇實高工"],
+        [11234001, 11237436, "國立斗六高中"],
+        [14510101, 14510101, "國立斗六高中"],
+        [19510101, 19510301, "國立斗六高中"],
+        [11237501, 11240831, "國立虎尾高中"],
+        [11240901, 11246230, "國立嘉義高中"],
+        [14540101, 14540101, "國立嘉義高中"],
+        [11246301, 11250436, "國立嘉義女中"],
+        [19540101, 19540502, "國立嘉義女中"],
+        [11250501, 11253935, "國立臺南一中"],
+        [14610101, 14610102, "國立臺南一中"],
+        [19610101, 19610701, "國立臺南一中"],
+        [11254001, 11259036, "國立臺南二中"],
+        [11259101, 11263136, "國立臺南女中"],
+        [11263201, 11267736, "國立家齊高中"],
+        [11267801, 11272936, "私立長榮高中"],
+        [11273001, 11276208, "國立新營高中"],
+        [19640101, 19640203, "國立新營高中"],
+        [11276301, 11279019, "國立高雄師範大學"],
+        [14710101, 14710103, "國立高雄師範大學"],
+        [19710101, 19711008, "國立高雄師範大學"],
+        [11279101, 11281036, "國立高雄師大附中"],
+        [11281101, 11284536, "高雄市立中正高中"],
+        [11284601, 11289236, "國立鳳新高中"],
+        [11289301, 11294636, "私立道明高中"],
+        [11294701, 11299236, "高雄市立高雄高中"],
+        [11299301, 11303736, "高雄市立高雄女中"],
+        [11303801, 11307631, "高雄市立中山高中"],
+        [11307701, 11312236, "高雄市立左營高中"],
+        [11312301, 11314734, "國立屏東大學"],
+        [19770101, 19770201, "國立屏東大學"],
+        [11314801, 11316436, "國立屏東大學屏師校區"],
+        [11316501, 11319836, "國立屏東女中"],
+        [11319901, 11326235, "國立宜蘭大學"],
+        [14810101, 14810103, "國立宜蘭大學"],
+        [19810101, 19810204, "國立宜蘭大學"],
+        [11326301, 11328436, "國立花蓮高中"],
+        [11328501, 11330514, "國立花蓮女中"],
+        [19840101, 19840203, "國立花蓮女中"],
+        [11330601, 11332810, "國立臺東女中"],
+        [19870101, 19870102, "國立臺東女中"],
+        [11332901, 11333523, "國立澎湖科技大學"],
+        [19910101, 19910101, "國立澎湖科技大學"],
+        [11333601, 11334531, "國立金門大學"],
+        [19920101, 19920103, "國立金門大學"],
+        [11334601, 11334708, "國立馬祖高中"]
+    ];
 
     let rawData = null, idToIndex = {}, schoolDepts = {}, codeToDept = {}, rowIdx = 0, currentMode = 'normal';
     let resultsHistory = { normal: { ids: [], crit: [] }, adv: { ids: [], crit: [] } };
@@ -241,13 +369,11 @@
                 for (let d in schs[s]) {
                     const info = schs[s][d];
                     const code = info["科系代碼"];
-                    const count = (info["錄取名單"] || []).length;
                     schoolDepts[s].depts.push({ name: d, code });
                     if (code && code !== "科大代碼") codeToDept[code] = { type, s, d };
-                    
                     (info["錄取名單"] || []).forEach(id => {
                         if (!idToIndex[id]) idToIndex[id] = [];
-                        idToIndex[id].push({ type, s, d, code, quota: info["招生名額"], count, date: info["面試日期"] });
+                        idToIndex[id].push({ type, s, d, code, quota: info["招生名額"], count: (info["錄取名單"]||[]).length, date: info["面試日期"] });
                     });
                 }
             }
@@ -263,7 +389,7 @@
         [...new Set(TEST_SITES.map(x => x[2]))].sort().forEach(v => {
             const o = document.createElement('option'); o.value = v; o.innerText = v; ss.appendChild(o);
         });
-        document.getElementById('data-status').innerText = "✅ 115 數據已同步";
+        document.getElementById('data-status').innerText = "✅ 115 數據與完整試場已同步";
         document.getElementById('searchBtn').disabled = false;
     }
 
@@ -273,12 +399,9 @@
         document.getElementById('tab-adv').classList.toggle('active', m === 'adv');
         document.getElementById('section-normal').style.display = m === 'normal' ? 'block' : 'none';
         document.getElementById('section-adv').style.display = m === 'adv' ? 'block' : 'none';
-        
         const hist = resultsHistory[m];
         render(hist.ids, hist.crit);
-        
         if (m === 'adv' && !document.getElementById('adv-list').children.length) addAdvRow();
-        updateUrl();
     }
 
     function addAdvRow(initCode = "") {
@@ -295,7 +418,7 @@
                 <input type="text" class="dept-in" list="${dlId}" placeholder="系組名" oninput="handleDeptIn(this, ${rowIdx})">
                 <datalist id="${dlId}"></datalist>
             </div>
-            <button class="btn-remove" onclick="this.parentElement.remove(); updateUrl();"><span class="material-symbols-outlined">delete_outline</span></button>
+            <button class="btn-remove" onclick="this.parentElement.remove();"><span class="material-symbols-outlined">delete_outline</span></button>
         `;
         container.appendChild(div);
         if (initCode) handleCodeIn(div.querySelector('.code-in'), rowIdx);
@@ -309,7 +432,6 @@
             row.querySelector('.sch-in').value = s;
             updateDeptDl(row, s);
             row.querySelector('.dept-in').value = d;
-            updateUrl();
         }
     }
     function handleSchIn(el, id) { updateDeptDl(document.getElementById(`adv-r-${id}`), el.value); }
@@ -317,7 +439,7 @@
         const row = document.getElementById(`adv-r-${id}`), s = row.querySelector('.sch-in').value;
         if (schoolDepts[s]) {
             const f = schoolDepts[s].depts.find(x => x.name === el.value);
-            if (f) { row.querySelector('.code-in').value = f.code; updateUrl(); }
+            if (f) row.querySelector('.code-in').value = f.code;
         }
     }
     function updateDeptDl(row, s) {
@@ -357,31 +479,26 @@
     function render(ids, crit) {
         const area = document.getElementById('resultsArea');
         area.innerHTML = ids.length ? "" : (resultsHistory[currentMode].crit.length || document.getElementById('userInput').value ? "<div style='text-align:center; padding:40px; color:#64748b;'>無符合條件的考生</div>" : "");
-        
         ids.forEach(id => {
             const wrap = document.createElement('div');
             wrap.className = `result-item ${ids.length === 1 ? 'active' : ''}`;
             const site = TEST_SITES.find(x => id >= x[0] && id <= x[1]);
             const html = (idToIndex[id] || []).map(r => {
                 const isMatch = crit.some(c => c.s === r.s && c.d === r.d);
-                const isCac = r.type === 'cac';
                 return `
                 <div class="dept-card ${isMatch ? 'match' : ''}" onclick="openModal('${r.type}','${r.s}','${r.d}')">
                     <div>
-                        <span class="badge-tag badge-${r.type}">${isCac ? '普通大學' : '科技大學'}</span>
+                        <span class="badge-tag badge-${r.type}">${r.type === 'cac' ? '普通大學' : '科技大學'}</span>
                         <div style="font-weight:700;">${r.s}</div>
                         <div style="font-size:14px; opacity:0.8;">${r.d}</div>
                         <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
                             <span class="info-pill"><span class="material-symbols-outlined" style="font-size:14px;">fingerprint</span> ${r.code}</span>
-                            ${isCac ? `<span class="info-pill"><span class="material-symbols-outlined" style="font-size:14px;">groups</span> 名額: ${r.quota}</span>` : ''}
-                            <span class="info-pill"><span class="material-symbols-outlined" style="font-size:14px;">how_to_reg</span> 通過篩選數: ${r.count}</span>
-                            ${isCac ? `<span class="info-pill"><span class="material-symbols-outlined" style="font-size:14px;">event</span> ${r.date}</span>` : ''}
+                            <span class="info-pill"><span class="material-symbols-outlined" style="font-size:14px;">how_to_reg</span> 通過數: ${r.count}</span>
                         </div>
                     </div>
                     <span class="material-symbols-outlined" style="color:var(--md-sys-color-primary)">chevron_right</span>
                 </div>`;
             }).join('');
-
             wrap.innerHTML = `
                 <div class="result-header" onclick="this.parentElement.classList.toggle('active')">
                     <div>
@@ -399,74 +516,55 @@
 
     function openModal(t, s, d) {
         const obj = rawData[t][s][d], ids = obj["錄取名單"] || [];
-        const isCac = t === 'cac';
         document.getElementById('m-title').innerText = d;
         document.getElementById('m-sub').innerText = `${s} (#${obj["科系代碼"]})`;
-        document.getElementById('m-stats').innerHTML = `
-            ${isCac ? `<span class="info-pill" style="background:var(--md-sys-color-primary-container)"><span class="material-symbols-outlined" style="font-size:14px;">groups</span> 招生名額: ${obj["招生名額"]||'-'}</span>` : ''}
-            <span class="info-pill" style="background:var(--md-sys-color-primary-container)"><span class="material-symbols-outlined" style="font-size:14px;">how_to_reg</span> 通過篩選數: ${ids.length}</span>
-        `;
+        document.getElementById('m-stats').innerHTML = `<span class="info-pill" style="background:var(--md-sys-color-primary-container)">通過篩選總數: ${ids.length}</span>`;
         const body = document.getElementById('modalBody'); body.innerHTML = "";
         ids.forEach(id => {
             const r = document.createElement('div'); r.className = 'list-row';
             r.innerHTML = `<span>${rawData.name_map[id]||"未公開姓名"}</span><span style="font-family:monospace; opacity:0.5">${id}</span>`;
-            r.onclick = () => { closeModal(); resultsHistory[currentMode] = { ids:[id], crit:[] }; render([id], []); window.scrollTo({top:0, behavior:'smooth'}); };
+            r.onclick = () => { closeModal(); resultsHistory[currentMode] = { ids:[id], crit:[] }; render([id], []); window.scrollTo(0,0); };
             body.appendChild(r);
         });
         document.getElementById('modalMask').style.display = 'flex';
     }
 
     function openHelp() {
-        document.getElementById('m-title').innerText = "系統說明與資料來源";
+        document.getElementById('m-title').innerText = "系統說明";
         document.getElementById('m-sub').innerText = "115 學年度聯合查榜服務";
         document.getElementById('m-stats').innerHTML = "";
-        document.getElementById('modalBody').innerHTML = `
-            <div class="help-content">
-                <p><b>1. 資料來源：</b><br>本系統所有數據均來自「大學甄選入學委員會 (CAC)」及「技專校院招生委員會聯合會 (JCTV)」之官方公開產製網頁。</p>
-                <p><b>2. 姓名連結原理：</b><br>由於普通大學端（甄選會）通常不直接公開考生姓名。本系統係透過<b>科技大學（科大端）</b>公開之准考證與姓名對應關係，反向推導並串連至普大錄取名單，以達成跨校系查榜。</p>
-                <p><b>3. 為何顯示「未公開姓名」？</b><br>若該考生僅報名普通大學，或其准考證號碼<b>未出現在科大的錄取名單中</b>，系統將無法獲取對應姓名，故顯示為「未公開姓名」。</p>
-                <hr style="opacity:0.2; margin:20px 0;">
-                <p style="font-size:13px; color:gray; text-align:center;">本系統僅供學術交流與參考使用，正式結果請以各招生委員會公告為準。</p>
-            </div>
-        `;
+        document.getElementById('modalBody').innerHTML = `<div class="help-content"><p>本系統整合甄選會與技專校院數據。若考生未報名科大，系統將無法獲取姓名，僅顯示准考證。考場資訊依據大考中心分配表產製。</p></div>`;
         document.getElementById('modalMask').style.display = 'flex';
     }
 
     function closeModal() { document.getElementById('modalMask').style.display = 'none'; }
+    function resetAll() { location.href = location.pathname; }
 
     function updateUrl() {
         const p = new URLSearchParams();
         if (currentMode === 'normal') {
             const q = document.getElementById('userInput').value.trim(); if (q) p.set('q', q);
         } else {
-            p.set('m', 'adv'); 
-            const site = document.getElementById('siteSelect').value; if (site !== "ALL") p.set('site', site);
+            p.set('m', 'adv');
             const cs = Array.from(document.querySelectorAll('.code-in')).map(x => x.value).filter(v => v.length === 6);
             if (cs.length) p.set('codes', cs.join(','));
         }
-        window.history.replaceState({}, '', window.location.pathname + (p.toString() ? '?' + p.toString() : ''));
+        window.history.replaceState({}, '', '?' + p.toString());
     }
 
     function handleUrlParams() {
         const p = new URLSearchParams(window.location.search);
         if (p.get('m') === 'adv' || p.get('codes')) {
             switchMode('adv');
-            if (p.get('site')) document.getElementById('siteSelect').value = p.get('site');
-            if (p.get('codes')) { document.getElementById('adv-list').innerHTML = ""; p.get('codes').split(',').forEach(c => addAdvRow(c)); startSearch(); }
+            if (p.get('codes')) { 
+                document.getElementById('adv-list').innerHTML = ""; 
+                p.get('codes').split(',').forEach(c => addAdvRow(c)); 
+                startSearch(); 
+            }
         } else if (p.get('q')) {
             document.getElementById('userInput').value = p.get('q');
             startSearch();
         }
-    }
-
-    function resetAll() {
-        resultsHistory = { normal: { ids: [], crit: [] }, adv: { ids: [], crit: [] } };
-        document.getElementById('userInput').value = "";
-        document.getElementById('adv-list').innerHTML = "";
-        document.getElementById('resultsArea').innerHTML = "";
-        document.getElementById('siteSelect').selectedIndex = 0;
-        switchMode('normal');
-        window.history.replaceState({}, '', window.location.pathname);
     }
 </script>
 </body>
