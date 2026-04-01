@@ -1,4 +1,4 @@
-import requests, json, re, os, time, urllib3
+import requests, json, re, os, time, urllib3, random
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -6,9 +6,37 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 # 停用 SSL 安全警告
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# ==========================================
-# 1. 完整考場數據庫 (PDF 1-7頁全銜)
-# ==========================================
+# ================= 顏色與極簡樣式 =================
+class UI:
+    C = '\033[96m' ; G = '\033[92m' ; Y = '\033[93m' ; R = '\033[91m'
+    B = '\033[1m'  ; BL = '\033[94m'; M = '\033[95m'; RS = '\033[0m'
+    
+    @staticmethod
+    def banner():
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print(f"{UI.C}{UI.B}╔" + "═"*58 + "╗")
+        print(f"║{UI.RS} {UI.B}🎓 115 學年度 大學 / 科大 一階聯合查榜系統{UI.RS}          {UI.C}{UI.B}║")
+        print(f"╚" + "═"*58 + f"╝{UI.RS}")
+
+    @staticmethod
+    def bar_cfg(desc, color):
+        return {
+            'desc': f"{color}{desc:^10}{UI.RS}",
+            'bar_format': '{desc} {percentage:3.0f}% |{bar:20}| {n_fmt}/{total_fmt}',
+            'ascii': " ❯", 
+            'ncols': 55
+        }
+
+# ================= 配置區 =================
+HASH_ID = "ColQry_115xappLyfOrStu_Azd5gP29" 
+CAC_QUERY_ROOT = f"https://www.cac.edu.tw/apply115/system/{HASH_ID}/"
+CAC_RESULT_ROOT = "https://www.cac.edu.tw/CacLink/apply115/115Apply_sievE_Result_querY_615JG8Wgh9d/html_sieve_result_115_Zx57f1dW/ColPost/"
+JCTV_URL = "https://ent01.jctv.ntut.edu.tw/applys1result/college.html"
+JCTV_JS_URL = "https://www.jctv.ntut.edu.tw/downloads/115/apply/ugcdrom/js/warehouse.js"
+DB_FILE = "exam_local_db.json"
+MAX_WORKERS = 8 
+
+# ================= 1. 完整考場數據庫 (PDF 1-7頁全銜) =================
 TEST_SITES = [
     (11000101, 11006036, "臺北市立大同高中"), (11006101, 11009236, "臺北市立建國高中"), (14110101, 14110103, "臺北市立建國高中"),
     (11009301, 11012736, "臺北市立第一女中"), (11012801, 11016136, "臺北市立西松高中"), (11016201, 11020836, "臺北市立和平高中"),
@@ -46,171 +74,190 @@ TEST_SITES = [
     (11333601, 11334531, "國立金門大學"), (11334601, 11334708, "國立馬祖高中")
 ]
 
-# --- 2. 配置 ---
-DB_FILE = "exam_local_db.json"
-REMOTE_DB_URL = "https://raw.githubusercontent.com/potatosserver/Tools/refs/heads/main/exam_local_db.json"
-MAX_WORKERS = 15
-JCTV_COOKIES = {'JSESSIONID': '560F695994077E8A9969AD2525D56EA1'} 
+# ================= 安全工具與抓取器 =================
 
-CAC_ROOT = "https://www.cac.edu.tw/CacLink/apply115/115Apply_sievE_Result_querY_615JG8Wgh9d/html_sieve_result_115_Zx57f1dW/ColPost/"
-JCTV_URL = "https://ent01.jctv.ntut.edu.tw/applys1result/college.html"
+class SafeFetcher:
+    def __init__(self):
+        self.session = requests.Session()
+        self.session.headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
 
-# ==========================================
-# 3. 功能函式 (抓取與解析)
-# ==========================================
+    def get(self, url, referer=None):
+        try:
+            h = {'Referer': referer} if referer else {}
+            r = self.session.get(url, headers=h, verify=False, timeout=25)
+            r.encoding = 'utf-8'
+            return r.text if r.status_code == 200 else None
+        except: return None
 
-def fetch_html(url, method="GET", data=None, referer=None, is_jctv=False):
-    h = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-    if referer: h['Referer'] = referer
+    def post(self, url, data):
+        try:
+            r = self.session.post(url, data=data, verify=False, timeout=25)
+            r.encoding = 'utf-8'
+            return r.text if r.status_code == 200 else None
+        except: return None
+
+fetcher = SafeFetcher()
+
+def get_site(eid):
     try:
-        cookies = JCTV_COOKIES if is_jctv else None
-        if method == "POST":
-            r = requests.post(url, headers=h, data=data, cookies=cookies, verify=False, timeout=15)
-        else:
-            r = requests.get(url, headers=h, verify=False, timeout=15)
-        r.encoding = 'utf-8'
-        return r.text if r.status_code == 200 else None
-    except: return None
-
-def process_cac_school(s_link):
-    name, url = s_link.get_text(strip=True), CAC_ROOT + s_link.get('href')
-    html = fetch_html(url, referer=CAC_ROOT+"collegeList.htm")
-    depts = {}
-    if html:
-        soup = BeautifulSoup(html, 'html.parser')
-        for tr in soup.find_all('tr', height="30px"):
-            tds = tr.find_all('td')
-            if not tds or "系" not in tds[0].text: continue
-            ids = []
-            for a in tr.select('a[href*="common/"], a[href*="extra/"]'):
-                d_html = fetch_html(CAC_ROOT + "web/" + a.get('href'), referer=url)
-                if d_html: ids.extend(re.findall(r'\b\d{8}\b', d_html))
-            if ids: depts[tds[0].get_text(strip=True)] = list(set(ids))
-    return name, depts
-
-def process_jctv_school(s_info):
-    code, name = s_info
-    html = fetch_html(JCTV_URL, "POST", {'doit':'view','code':code}, JCTV_URL, True)
-    depts, names = {}, {}
-    if html:
-        soup = BeautifulSoup(html, 'html.parser')
-        for tr in soup.select('table.enterTable tbody tr'):
-            tds = tr.find_all('td')
-            if len(tds) < 3: continue
-            d_name = tds[1].get_text(strip=True)
-            # 強力清理不可見字元
-            raw = tds[2].get_text(separator=" ", strip=True).replace("\n","").replace("\r","").replace("\t","").replace(" ","")
-            m = re.search(r'([^\(]+)\((\d{8})\)', raw)
-            if m:
-                p_n, p_i = m.group(1), m.group(2)
-                names[p_i] = p_n
-                if d_name not in depts: depts[d_name] = []
-                depts[d_name].append(p_i)
-    return name, depts, names
-
-# ==========================================
-# 4. 同步與搜尋模式
-# ==========================================
-
-def start_sync():
-    print("\n🚀 [模式1] 啟動高速官網同步...")
-    res = fetch_html(CAC_ROOT + "collegeList.htm")
-    if not res: return None
-    cac_links = BeautifulSoup(res, 'html.parser').select('td.colname a')
-    
-    cac_db = {}
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as exe:
-        futs = {exe.submit(process_cac_school, l): l for l in cac_links}
-        for f in tqdm(as_completed(futs), total=len(cac_links), desc="普大同步"):
-            n, d = f.result(); cac_db[n] = d
-
-    j_main = fetch_html(JCTV_URL)
-    if not j_main: return None
-    s_list = [(o.get('value'), o.get_text(strip=True)) for o in BeautifulSoup(j_main, 'html.parser').select('select option') if o.get('value') != "-1"]
-    
-    jctv_db, name_map = {}, {}
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as exe:
-        futs = {exe.submit(process_jctv_school, s): s for s in s_list}
-        for f in tqdm(as_completed(futs), total=len(s_list), desc="科大同步"):
-            n, d, nm = f.result(); jctv_db[n] = d; name_map.update(nm)
-
-    full_db = {"cac": cac_db, "jctv": jctv_db, "name_map": name_map}
-    with open(DB_FILE, 'w', encoding='utf-8') as f:
-        json.dump(full_db, f, ensure_ascii=False, indent=2) # 修正：加入 indent 讓 JSON 易讀
-    return full_db
-
-def run_cloud():
-    print(f"\n📡 [模式2] 正在從 GitHub 同步預爬資料庫...")
-    try:
-        r = requests.get(REMOTE_DB_URL, verify=False, timeout=20)
-        return r.json() if r.status_code == 200 else None
-    except: return None
-
-def mask_name(name):
-    if len(name) < 2: return name
-    if "Ｏ" in name: return name
-    return name[0] + "Ｏ" + (name[-1] if len(name) > 2 else "")
-
-def get_site(num):
-    v = int(num)
-    for s, e, n in TEST_SITES:
-        if s <= v <= e: return n
+        v = int(eid)
+        for s, e, n in TEST_SITES:
+            if s <= v <= e: return n
+    except: pass
     return "未知考場"
 
-def start_ui(db):
-    nm_map = db.get("name_map", {})
-    print("\n" + "═"*60 + "\n🎓 115 學年度 聯合查榜系統 (本地+網頁 雙模式)\n" + "═"*60)
-    print("💡 支援輸入: 8位應試號碼 或 姓名(如: 趙學群)")
-    while True:
-        query = input("\n請輸入查詢 (Q 離開): ").strip()
-        if query.lower() == 'q': break
+# ================= 核心爬蟲邏輯 =================
+
+class ProScraper:
+    def __init__(self):
+        self.db = {"cac": {}, "jctv": {}, "name_map": {}}
+        self.cac_meta = {}
+
+    def sync_cac_meta(self):
+        list_html = fetcher.post(CAC_QUERY_ROOT + "ShowSchool.php", 
+                                 data={'option': 'SCHNAME', 'SubSchName': '依學校名稱查詢'})
+        if not list_html: return
+        sch_codes = list(set(re.findall(r'colno=\s*(\d{3})', list_html)))
         
-        target_ids = []
-        if re.match(r'^\d{8}$', query):
-            target_ids = [query]
-        else:
-            m_name = mask_name(query)
-            target_ids = [eid for eid, n in nm_map.items() if n == m_name]
-            if not target_ids:
-                print(f"❌ 找不到「{m_name}」的紀錄。")
-                continue
+        def process_meta(c):
+            h = fetcher.get(f"{CAC_QUERY_ROOT}ShowSchGsd.php?colno={c}", referer=CAC_QUERY_ROOT+"ShowSchool.php")
+            m = {}
+            if h:
+                for row in BeautifulSoup(h, 'html.parser').find_all('tr'):
+                    match = re.search(r'\((\d{6})\)', row.get_text())
+                    tds = row.find_all('td')
+                    if match and len(tds) >= 9:
+                        m[match.group(1)] = {"q": tds[1].text.strip(), "d": tds[8].text.strip()}
+            return m
 
-        for eid in target_ids:
-            name = nm_map.get(eid, "（無姓名記錄）")
-            site = get_site(eid)
-            print(f"\n【考生資訊】號碼: {eid} | 姓名: {name} | 考場: {site}")
+        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as exe:
+            futs = [exe.submit(process_meta, c) for c in sch_codes]
+            with tqdm(**UI.bar_cfg("普大架構", UI.BL), total=len(sch_codes)) as pbar:
+                for f in as_completed(futs):
+                    self.cac_meta.update(f.result())
+                    pbar.update(1)
+
+    def run_cac(self):
+        res = fetcher.get(CAC_RESULT_ROOT + "collegeList.htm")
+        if not res: return
+        sch_links = BeautifulSoup(res, 'html.parser').select('td.colname a')
+        
+        def process_sch(link):
+            sn, su = link.get_text(strip=True), CAC_RESULT_ROOT + link.get('href')
+            h = fetcher.get(su, referer=CAC_RESULT_ROOT+"collegeList.htm")
+            depts = {}
+            if h:
+                for tr in BeautifulSoup(h, 'html.parser').find_all('tr', height="30px"):
+                    tds = tr.find_all('td')
+                    if not tds or "系" not in tds[0].text: continue
+                    ids, dc = [], ""
+                    for a in tr.select('a[href*=".htm"]'):
+                        mc = re.search(r'(\d{6})\.htm', a.get('href'))
+                        if mc: dc = mc.group(1)
+                        d_h = fetcher.get(CAC_RESULT_ROOT + "web/" + a.get('href'), referer=su)
+                        if d_h: ids.extend(re.findall(r'\b\d{8}\b', d_h))
+                    if dc:
+                        m = self.cac_meta.get(dc, {"q": "-", "d": "-"})
+                        depts[tds[0].get_text(strip=True)] = {
+                            "科系代碼": dc, "招生名額": m["q"], "面試日期": m["d"], "錄取名單": list(set(ids))
+                        }
+            return sn, depts
+
+        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as exe:
+            futs = [exe.submit(process_sch, l) for l in sch_links]
+            with tqdm(**UI.bar_cfg("普大名單", UI.G), total=len(sch_links)) as pbar:
+                for f in as_completed(futs):
+                    n, d = f.result(); self.db["cac"][n] = d
+                    pbar.update(1)
+
+    def run_jctv(self):
+        js = fetcher.get(JCTV_JS_URL)
+        j_lookup = {}
+        if js:
+            for item in re.findall(r'\[(.*?)\]', re.search(r'deptData\s*=\s*new Array\((.*?)\);', js, re.DOTALL).group(1)):
+                p = [x.strip().strip("'") for x in item.split("','")]
+                if len(p) >= 5: j_lookup[p[0]+p[2]] = p[1]
+
+        res = fetcher.get(JCTV_URL)
+        if not res: return
+        s_list = [(o.get('value'), o.get_text(strip=True)) for o in BeautifulSoup(res, 'html.parser').select('select option') if o.get('value') != "-1"]
+
+        with tqdm(**UI.bar_cfg("科大同步", UI.Y), total=len(s_list)) as pbar:
+            for sc, sn in s_list:
+                h = fetcher.post(JCTV_URL, data={'doit':'view','code':sc})
+                if h:
+                    if sn not in self.db["jctv"]: self.db["jctv"][sn] = {}
+                    for tr in BeautifulSoup(h, 'html.parser').select('table.enterTable tbody tr'):
+                        tds = tr.find_all('td')
+                        if len(tds) < 3: continue
+                        dn, raw = tds[1].get_text(strip=True), tds[2].get_text()
+                        ids = []
+                        for pn, pi in re.findall(r'([^\(]+)\((\d{8})\)', raw):
+                            # --- 修正：強力清理姓名中的空白與換行符號 ---
+                            clean_pn = re.sub(r'[\r\n\t\s]+', '', pn)
+                            self.db["name_map"][pi] = clean_pn
+                            ids.append(pi)
+                        dc = j_lookup.get(sc+dn, "未知")
+                        if dn not in self.db["jctv"][sn]: self.db["jctv"][sn][dn] = {"科系代碼": dc, "錄取名單": []}
+                        self.db["jctv"][sn][dn]["錄取名單"] = list(set(self.db["jctv"][sn][dn]["錄取名單"] + ids))
+                pbar.update(1)
+
+    def save(self):
+        with open(DB_FILE, 'w', encoding='utf-8') as f:
+            json.dump(self.db, f, ensure_ascii=False, indent=2)
+
+# ================= 查詢介面 =================
+
+def start_ui(db=None):
+    if not db:
+        if not os.path.exists(DB_FILE): return
+        with open(DB_FILE, 'r', encoding='utf-8') as f: db = json.load(f)
+    nm = db.get("name_map", {})
+    UI.banner()
+    print(f"{UI.Y}💡 支援 姓名 或 8 位應試號碼{UI.RS}")
+    
+    while True:
+        q = input(f"\n{UI.B}🔍 查詢 (Q 離開): {UI.RS}").strip()
+        if q.lower() == 'q': break
+        masked = q[0]+"Ｏ"+(q[-1] if len(q)>2 else "") if not re.match(r'^\d+$', q) else ""
+        ids = [q] if re.match(r'^\d{8}$', q) else [i for i, n in nm.items() if n == masked]
+        if not ids: print(f"{UI.R}❌ 查無記錄。{UI.RS}"); continue
+
+        for eid in ids:
+            print(f"\n{UI.BL}┏" + "━"*45 + "┓")
+            print(f"┃ {UI.B}應試號碼：{eid}{UI.RS}")
+            print(f"┃ {UI.B}考生姓名：{nm.get(eid, f'{UI.R}普大不公開{UI.RS}')}{UI.RS}")
+            print(f"┃ {UI.B}分配考場：{get_site(eid)}{UI.RS}")
+            print(f"{UI.BL}┗" + "━"*45 + f"┛{UI.RS}")
+            
             found = False
-            for k, l in [('cac', '普大'), ('jctv', '科大')]:
-                for s, depts in db.get(k, {}).items():
-                    for d, ids in depts.items():
-                        if eid in ids:
-                            print(f"  ✅ [{l}] {s} - {d}")
+            for cat, label, color in [('cac', '普大', UI.G), ('jctv', '科大', UI.Y)]:
+                for s, depts in db.get(cat, {}).items():
+                    for dn, info in depts.items():
+                        if eid in info["錄取名單"]:
+                            print(f"  {color}❯{UI.RS} [{label}] {s}")
+                            print(f"    └ {dn} ({UI.B}{info['科系代碼']}{UI.RS})")
+                            if cat=='cac': print(f"      名額:{info['招生名額']} | 日期:{info['面試日期']}")
                             found = True
-            if not found: print("  ❌ 未找到通過記錄")
+            if not found: print(f"  {UI.R}✘ 未找到錄取記錄。{UI.RS}")
 
-# ==========================================
-# 5. 主程序入口
-# ==========================================
 if __name__ == "__main__":
-    print("歡迎使用 115學年度一階查榜工具")
-    print("-" * 35)
-    print("1. [官網下載] 即時高速抓取 (需更新 Cookie)")
-    print("2. [雲端下載] 從 GitHub 獲取預爬 JSON")
-    print("3. [本地查詢] 直接使用本地檔案")
-    print("-" * 35)
-    mode = input("請選擇模式 (1/2/3): ").strip()
+    UI.banner()
+    print(f"1. {UI.G}[官網同步]{UI.RS} 建立本地資料庫")
+    print(f"2. {UI.C}[雲端同步]{UI.RS} 獲取最新預爬資料")
+    print(f"3. {UI.Y}[本地查詢]{UI.RS} 載入已存檔案")
+    m = input(f"\n{UI.B}請選擇模式: {UI.RS}").strip()
 
-    db = None
-    if mode == '1':
-        db = start_sync()
-    elif mode == '2':
-        db = run_cloud()
-    elif mode == '3':
-        if os.path.exists(DB_FILE):
-            with open(DB_FILE, 'r', encoding='utf-8') as f:
-                db = json.load(f)
-        else:
-            print("❌ 本地無資料，請先選模式 1 或 2")
-
-    if db: start_ui(db)
-    else: print("❌ 啟動失敗，請檢查網路或 Cookie。")
+    data = None
+    if m == '1':
+        p = ProScraper()
+        p.sync_cac_meta()
+        p.run_cac()
+        p.run_jctv()
+        p.save()
+        data = p.db
+    elif m == '2':
+        # 雲端下載邏輯範例
+        pass
+    
+    if data or os.path.exists(DB_FILE): start_ui(data)
