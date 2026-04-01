@@ -86,7 +86,7 @@
 
         <div id="adv-section" class="adv-area">
             <div>
-                <label class="input-label">1. 選擇範圍</label>
+                <label class="input-label">1. 選擇考場</label>
                 <!-- 這裡加入了不限定考場選項 -->
                 <select id="siteSelect">
                     <option value="">-- 請選擇搜尋範圍 --</option>
@@ -306,7 +306,7 @@
             }).join('');
             wrap.innerHTML = `
                 <div class="student-header" onclick="this.parentElement.classList.toggle('active')">
-                    <div><b>${clean(rawData.name_map[id]) || "(未公開姓名)"}</b><br><small>號碼: ${id}</small><br><div class="site-info">📍 ${siteName}</div></div>
+                    <div><b>${clean(rawData.name_map[id]) || "(未公開姓名)"}</b><br><small>號碼: ${id}</small><br><div class="site-info">考場： ${siteName}</div></div>
                     <span style="font-size:12px;">▼ 詳情</span>
                 </div>
                 <div class="student-content">${html}</div>
