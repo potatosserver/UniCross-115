@@ -6,65 +6,59 @@
     <title>115學年度聯合查榜系統</title>
     <style>
         :root { --primary: #0284c7; --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; }
-        body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; }
+        body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; line-height: 1.5; min-height: 100vh; }
+        .container { max-width: 950px; margin: 0 auto; width: 100%; }
         
-        .container { max-width: 800px; margin: 0 auto; width: 100%; flex: 1; }
-        
-        header { text-align: center; margin-bottom: 30px; padding-top: 20px; }
-        header h1 { margin-bottom: 8px; font-size: 28px; }
-        header p { color: #64748b; margin: 0; }
+        header { text-align: center; margin-bottom: 20px; }
+        header h1 { font-size: 26px; color: var(--primary); margin: 0; }
 
-        .search-card { background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 6px solid var(--primary); }
-        .search-group { display: flex; gap: 8px; }
-        input { flex: 1; border: 2px solid #e2e8f0; padding: 15px; border-radius: 12px; font-size: 16px; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--primary); background: #fff; }
-        button { background: var(--primary); color: white; border: none; padding: 0 25px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.2s; }
-        button:hover { background: #0369a1; }
-        button:disabled { background: #cbd5e1; cursor: not-allowed; }
-        
-        .status { font-size: 13px; color: #64748b; text-align: center; margin-bottom: 12px; }
+        .mode-switcher { display: flex; background: #e2e8f0; padding: 4px; border-radius: 12px; margin-bottom: 20px; }
+        .mode-btn { flex: 1; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; background: transparent; transition: 0.2s; }
+        .mode-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-        /* 學生結果區塊 (手風琴效果) */
-        .student-wrapper { margin-bottom: 15px; border-radius: 20px; overflow: hidden; background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
-        .student-header { 
-            background: linear-gradient(135deg, #0284c7, #075985); color: white; padding: 20px 25px; 
-            cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.3s;
-        }
-        .student-header h2 { margin: 0; font-size: 22px; letter-spacing: 2px; }
-        .student-header .arrow { transition: 0.3s; font-size: 18px; opacity: 0.7; }
+        .search-card { background: var(--card); padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-top: 6px solid var(--primary); margin-bottom: 20px; }
+        .input-label { display: block; font-size: 13px; font-weight: bold; color: #64748b; margin-bottom: 8px; }
+        input, select { border: 2px solid #e2e8f0; padding: 10px; border-radius: 10px; font-size: 14px; outline: none; width: 100%; box-sizing: border-box; background: #fff; }
         
-        .student-content { display: none; padding: 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; }
+        .adv-area { display: none; flex-direction: column; gap: 15px; }
+        .adv-area.active { display: flex; }
+
+        .admission-list { display: flex; flex-direction: column; gap: 10px; }
+        .admission-row { display: grid; grid-template-columns: 1fr 1.2fr 40px; gap: 8px; align-items: center; background: #f8fafc; padding: 10px; border-radius: 12px; border: 1px solid #e2e8f0; }
         
-        /* 展開狀態控制 */
+        .remove-btn { background: #fee2e2; color: #ef4444; border: none; height: 38px; width: 38px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 18px; }
+        .add-btn { background: white; border: 2px dashed #cbd5e1; color: #64748b; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 13px; width: 100%; margin-top: 5px; }
+
+        .main-btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 12px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; font-size: 16px; }
+        .main-btn:disabled { background: #cbd5e1; }
+
+        /* 結果顯示 */
+        .student-wrapper { margin-bottom: 12px; border-radius: 15px; overflow: hidden; background: #fff; border: 1px solid #e2e8f0; }
+        .student-header { background: #f8fafc; padding: 15px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .student-wrapper.active .student-header { background: linear-gradient(135deg, #0284c7, #075985); color: white; }
+        .student-content { display: none; padding: 15px; background: #fff; }
         .student-wrapper.active .student-content { display: block; }
-        .student-wrapper.active .arrow { transform: rotate(180deg); }
+        
+        .site-info { font-size: 12px; opacity: 0.8; margin-top: 4px; display: inline-block; background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 6px; }
+        .student-wrapper.active .site-info { background: rgba(255,255,255,0.2); }
 
-        .info-row { font-size: 14px; opacity: 0.9; margin-top: 5px; }
-        .site-badge { margin-top: 10px; background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 8px; font-size: 13px; display: inline-block; }
-        .site-name { font-weight: bold; color: #fef08a; }
-
-        /* 校系卡片 */
-        .school-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 5px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; border: 1px solid #f1f5f9; }
-        .school-card:hover { transform: translateX(5px); border-left-color: var(--primary); background: #f0f9ff; }
-        .type-tag { font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: bold; margin-bottom: 5px; display: inline-block; }
+        .school-card { background: #fff; padding: 12px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
+        .school-card:hover { border-color: var(--primary); background: #f0f9ff; }
+        .card-hit { border-left: 6px solid #f59e0b; background: #fffbeb; }
+        
+        .tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-bottom: 4px; display: inline-block; }
         .tag-cac { background: #e0f2fe; color: #0369a1; }
         .tag-jctv { background: #dcfce7; color: #166534; }
-
-        /* 錯誤訊息與提示 */
-        .no-result-msg { text-align: center; padding: 50px 20px; color: #64748b; font-size: 20px; font-weight: bold; background: white; border-radius: 20px; border: 2px dashed #e2e8f0; }
-        .hint-text { text-align: center; color: #94a3b8; font-size: 14px; margin-top: 30px; padding-bottom: 30px; }
 
         /* Modal 彈窗 */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(5px); z-index: 999; }
         .modal-content { background: white; width: 92%; max-width: 450px; margin: 8vh auto; border-radius: 24px; display: flex; flex-direction: column; height: 75vh; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        
         .modal-header { padding: 20px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-start; }
         .modal-body { padding: 10px; overflow-y: auto; flex: 1; }
-        .list-item { display: flex; justify-content: space-between; padding: 14px 15px; border-bottom: 1px solid #f8fafc; cursor: pointer; }
-        .list-item:hover { background: #f1f5f9; border-radius: 12px; color: var(--primary); }
-        
         .count-badge { background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: bold; display: inline-block; margin-top: 8px; }
+        .list-item { display: flex; justify-content: space-between; padding: 14px 15px; border-bottom: 1px solid #f8fafc; cursor: pointer; }
+        .list-item:hover { background: #f1f5f9; color: var(--primary); }
     </style>
 </head>
 <body>
@@ -72,26 +66,44 @@
 <div class="container">
     <header>
         <h1>🎓 115學年度聯合查榜系統</h1>
-        <p>整合 考場、考生姓名、普大/科大數據</p>
+        <div id="dataStatus" style="font-size:12px; color:#64748b; margin-top:5px;">🔄 正在載入同步數據...</div>
     </header>
 
+    <div class="mode-switcher">
+        <button id="btn-norm" class="mode-btn active" onclick="switchMode('normal')">一般查詢</button>
+        <button id="btn-adv" class="mode-btn" onclick="switchMode('adv')">反向推查 (最多12組)</button>
+    </div>
+
     <div class="search-card">
-        <div id="dataStatus" class="status">正在同步數據庫...</div>
-        <div class="search-group">
-            <input type="text" id="userInput" placeholder="輸入姓名或 8 位號碼..." disabled onkeydown="if(event.key==='Enter') handleSearch()">
-            <button id="searchBtn" onclick="handleSearch()" disabled>查詢</button>
+        <div id="norm-section">
+            <label class="input-label">准考證號或姓名</label>
+            <input type="text" id="userInput" placeholder="例如: 葉學群 或 11000101">
         </div>
+
+        <div id="adv-section" class="adv-area">
+            <div>
+                <label class="input-label">1. 選擇考場</label>
+                <select id="siteSelect"><option value="">-- 請選擇應試考場 --</option></select>
+            </div>
+            <div>
+                <label class="input-label">2. 錄取志願 (學校與系組皆可打字搜尋)</label>
+                <div id="admissionList" class="admission-list"></div>
+                <button type="button" class="add-btn" onclick="addAdmissionRow()">+ 新增志願組 (最多 12 組)</button>
+            </div>
+        </div>
+
+        <button id="searchBtn" class="main-btn" onclick="handleSearchClick()" disabled>立即查詢數據</button>
     </div>
 
     <div id="resultArea"></div>
-    <div id="footerHint" class="hint-text"></div>
 </div>
 
+<!-- 彈窗結構 -->
 <div id="deptModal" class="modal" onclick="closeModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
             <div>
-                <h3 id="modalTitle" style="margin:0">系組名單</h3>
+                <h3 id="modalTitle" style="margin:0; font-size:18px;">系組名單</h3>
                 <div id="modalSubTitle" style="color:#64748b; font-size:14px; margin-top:4px;"></div>
                 <div id="modalCount" class="count-badge"></div>
             </div>
@@ -101,160 +113,220 @@
     </div>
 </div>
 
+<datalist id="schoolList"></datalist>
+
 <script>
     const GITHUB_URL = "https://raw.githubusercontent.com/potatosserver/UniCross-115/refs/heads/main/exam_local_db.json";
-    
-    const TEST_SITES = [[11000101, 11006036, "臺北市立大同高中"], [11006101, 11009236, "臺北市立建國高中"], [14110101, 14110103, "臺北市立建國高中"], [11009301, 11012736, "臺北市立第一女中"], [11012801, 11016136, "臺北市立西松高中"], [11016201, 11020836, "臺北市立和平高中"], [19110101, 19112608, "國立臺灣大學"], [11020901, 11024836, "國立臺灣師大附中"], [11024901, 11028836, "臺北市立松山高中"], [11028901, 11032836, "臺北市立成淵高中"], [11032901, 11036336, "臺北市立華江高中"], [11036401, 11038836, "國立臺灣師範大學"], [19120101, 19121101, "國立臺灣師範大學"], [11038901, 11041636, "臺北市立中山女高"], [11041701, 11043617, "臺北市立景美女中"], [11043701, 11047536, "臺北市立百齡高中"], [11047601, 11051136, "臺北市立內湖高中"], [11051201, 11054136, "臺北市立木柵高工"], [11054201, 11056836, "新北市立新店高中"], [11056901, 11060336, "臺北市立陽明高中"], [11060401, 11063336, "臺北市立復興高中"], [11063401, 11068336, "國立華僑高中"], [19250101, 19250407, "國立華僑高中"], [11068401, 11073523, "新北市立海山高中"], [14250101, 14250104, "新北市立海山高中"], [11073601, 11078536, "新北市立板橋高中"], [19250501, 19251205, "新北市立板橋高中"], [11078601, 11083536, "新北市立新莊高中"], [19251301, 19251507, "新北市立新莊高中"], [11083601, 11089332, "新北市立丹鳳高中"], [14250201, 14250201, "新北市立丹鳳高中"], [19251601, 19251902, "新北市立丹鳳高中"], [11089401, 11093915, "新北市立新北高中"], [14260101, 14260102, "新北市立新北高中"], [19260101, 19260409, "新北市立新北高中"], [11094001, 11098236, "新北市立三民高中"], [11098301, 11103536, "新北市立永平高中"], [14260201, 14260203, "新北市立永平高中"], [19260501, 19260802, "新北市立永平高中"], [11103601, 11108630, "新北市立錦和高中"], [11108701, 11110136, "新北市立光復高中"], [11110201, 11112716, "國立臺灣海洋大學"], [19300101, 19300401, "國立臺灣海洋大學"], [11112801, 11114936, "國立基隆女中"], [11115001, 11118836, "桃園市立武陵高中"], [14310101, 14310103, "桃園市立武陵高中"], [11118901, 11123336, "桃園市立陽明高中"], [11123401, 11128236, "桃園市立桃園高中"], [11128301, 11131426, "國立北科大附屬桃園農工"], [19310101, 19311001, "國立北科大附屬桃園農工"], [11131501, 11135236, "國立中央大學附屬中壢高中"], [19320101, 19320507, "國立中央大學附屬中壢高中"], [11135301, 11139136, "私立復旦高中"], [11139201, 11143036, "私立育達高中"], [11143101, 11146436, "桃園市立平鎮高中"], [14320101, 14320101, "桃園市立平鎮高中"], [11146501, 11149108, "桃園市立大園國際高中"], [11149201, 11152136, "國立新竹高中"], [17340101, 17340105, "國立新竹高中"], [19340101, 19340708, "國立新竹高中"], [11152201, 11155936, "國立新竹女中"], [14340101, 14340101, "國立新竹女中"], [11156001, 11159636, "私立曙光女中"], [11159701, 11163206, "新竹市立香山高中"], [11163301, 11167622, "國立陽明交大附中"], [11167701, 11171730, "國立苗栗高中"], [19370101, 19370304, "國立苗栗高中"], [11171801, 11176036, "臺中市立文華高中"], [19410101, 19410903, "臺中市立文華高中"], [11176101, 11181236, "臺中市立臺中二中"], [11181301, 11186836, "臺中市立臺中一中"], [11186901, 11191036, "國立中興大學附中"], [11191101, 11195836, "私立明德高中"], [11195901, 11198016, "靜宜大學"], [11198101, 11201636, "臺中市立清水高中"], [19430101, 19430202, "臺中市立清水高中"], [11201701, 11207615, "私立弘文高中"], [14430101, 14430105, "私立弘文高中"], [19430301, 19430305, "私立弘文高中"], [11207701, 11212136, "臺中市立臺中女中"], [11212201, 11216326, "臺中市立惠文高中"], [14440101, 14440102, "臺中市立惠文高中"], [11216401, 11219305, "國立中興高中"], [14460101, 14460101, "國立中興高中"], [19460101, 19460207, "國立中興高中"], [11219401, 11220836, "私立同德高中"], [11220901, 11223615, "國立彰化師範大學"], [19470101, 19470401, "國立彰化師範大學"], [11223701, 11228436, "國立彰化師大附屬高工"], [11228501, 11231419, "國立員林高中"], [14470101, 14470102, "國立員林高中"], [19470501, 19470702, "國立員林高中"], [11231501, 11233936, "國立員林崇實高工"], [11234001, 11237436, "國立斗六高中"], [14510101, 14510101, "國立斗六高中"], [19510101, 19510301, "國立斗六高中"], [11237501, 11240831, "國立虎尾高中"], [11240901, 11246230, "國立嘉義高中"], [14540101, 14540101, "國立嘉義高中"], [11246301, 11250436, "國立嘉義女中"], [19540101, 19540502, "國立嘉義女中"], [11250501, 11253935, "國立臺南一中"], [14610101, 14610102, "國立臺南一中"], [19610101, 19610701, "國立臺南一中"], [11254001, 11259036, "國立臺南二中"], [11259101, 11263136, "國立臺南女中"], [11263201, 11267736, "國立家齊高中"], [11267801, 11272936, "私立長榮高中"], [11273001, 11276208, "國立新營高中"], [19640101, 19640203, "國立新營高中"], [11276301, 11279019, "國立高雄師範大學"], [14710101, 14710103, "國立高雄師範大學"], [19710101, 19711008, "國立高雄師範大學"], [11279101, 11281036, "國立高雄師大附中"], [11281101, 11284536, "高雄市立中正高中"], [11284601, 11289236, "國立鳳新高中"], [11289301, 11294636, "私立道明高中"], [11294701, 11299236, "高雄市立高雄高中"], [11299301, 11303736, "高雄市立高雄女中"], [11303801, 11307631, "高雄市立中山高中"], [11307701, 11312236, "高雄市立左營高中"], [11312301, 11314734, "國立屏東大學"], [19770101, 19770201, "國立屏東大學"], [11314801, 11316436, "國立屏東大學(屏師校區)"], [11316501, 11319836, "國立屏東女中"], [11319901, 11326235, "國立宜蘭大學"], [11326301, 11328436, "國立花蓮高中"], [11328501, 11330514, "國立花蓮女女中"], [11330601, 11332810, "國立臺東女中"], [11332901, 11333523, "國立澎湖科技大學"], [11333601, 11334531, "國立金門大學"], [11334601, 11334708, "國立馬祖高中"]];
+    const TEST_SITES = [[11000101, 11006036, "臺北市立大同高中"], [11006101, 11009236, "臺北市立建國高中"], [14110101, 14110103, "臺北市立建國高中"], [11009301, 11012736, "臺北市立第一女中"], [11012801, 11016136, "臺北市立西松高中"], [11016201, 11020836, "臺北市立和平高中"], [19110101, 19112608, "國立臺灣大學"], [11020901, 11024836, "國立臺灣師大附中"], [11024901, 11028836, "臺北市立松山高中"], [11028901, 11032836, "臺北市立成淵高中"], [11032901, 11036336, "臺北市立華江高中"], [11036401, 11038836, "國立臺灣師範大學"], [11038901, 11041636, "臺北市立中山女高"], [11041701, 11043617, "臺北市立景美女中"], [11043701, 11047536, "臺北市立百齡高中"], [11047601, 11051136, "臺北市立內湖高中"], [11051201, 11054136, "臺北市立木柵高工"], [11054201, 11056836, "新北市立新店高中"], [11056901, 11060336, "臺北市立陽明高中"], [11060401, 11063336, "臺北市立復興高中"], [11063401, 11068336, "國立華僑高中"], [11068401, 11073523, "新北市立海山高中"], [11073601, 11078536, "新北市立板橋高中"], [11078601, 11083536, "新北市立新莊高中"], [11083601, 11089332, "新北市立丹鳳高中"], [11089401, 11093915, "新北市立新北高中"], [11094001, 11098236, "新北市立三民高中"], [11098301, 11103536, "新北市立永平高中"], [11103601, 11108630, "新北市立錦和高中"], [11108701, 11110136, "新北市立光復高中"], [11110201, 11112716, "國立臺灣海洋大學"], [11112801, 11114936, "國立基隆女中"], [11115001, 11118836, "桃園市立武陵高中"], [11118901, 11123336, "桃園市立陽明高中"], [11123401, 11128236, "桃園市立桃園高中"], [11128301, 11131426, "國立北科大附屬桃園農工"], [11131501, 11135236, "國立中央大學附屬中壢高中"], [11135301, 11139136, "私立復旦高中"], [11139201, 11143036, "私立育達高中"], [11143101, 11146436, "桃園市立平鎮高中"], [11146501, 11149108, "桃園市立大園國際高中"], [11149201, 11152136, "國立新竹高中"], [11152201, 11155936, "國立新竹女中"], [11156001, 11159636, "私立曙光女中"], [11159701, 11163206, "新竹市立香山高中"], [11163301, 11167622, "國立陽明交大附中"], [11167701, 11171730, "國立苗栗高中"], [11171801, 11176036, "臺中市立文華高中"], [11176101, 11181236, "臺中市立臺中二中"], [11181301, 11186836, "臺中市立臺中一中"], [11186901, 11191036, "國立中興大學附中"], [11191101, 11195836, "私立明德高中"], [11195901, 11198016, "靜宜大學"], [11198101, 11201636, "臺中市立清水高中"], [11201701, 11207615, "私立弘文高中"], [11207701, 11212136, "臺中市立臺中女中"], [11212201, 11216326, "臺中市立惠文高中"], [11216401, 11219305, "國立中興高中"], [11219401, 11220836, "私立同德高中"], [11220901, 11223615, "國立彰化師範大學"], [11223701, 11228436, "國立彰化師大附屬高工"], [11228501, 11231419, "國立員林高中"], [11231501, 11233936, "國立員林崇實高工"], [11234001, 11237436, "國立斗六高中"], [11237501, 11240831, "國立虎尾高中"], [11240901, 11246230, "國立嘉義高中"], [11246301, 11250436, "國立嘉義女中"], [11250501, 11253935, "國立臺南一中"], [11254001, 11259036, "國立臺南二中"], [11259101, 11263136, "國立臺南女中"], [11263201, 11267736, "國立家齊高中"], [11267801, 11272936, "私立長榮高中"], [11273001, 11276208, "國立新營高中"], [11276301, 11279019, "國立高雄師範大學"], [11279101, 11281036, "國立高雄師大附中"], [11281101, 11284536, "高雄市立中正高中"], [11284601, 11289236, "國立鳳新高中"], [11289301, 11294636, "私立道明高中"], [11294701, 11299236, "高雄市立高雄高中"], [11299301, 11303736, "高雄市立高雄女中"], [11303801, 11307631, "高雄市立中山高中"], [11307701, 11312236, "高雄市立左營高中"], [11312301, 11314734, "國立屏東大學"], [11314801, 11316436, "國立屏東大學(屏師校區)"], [11316501, 11319836, "國立屏東女中"], [11319901, 11326235, "國立宜蘭大學"], [11326301, 11328436, "國立花蓮高中"], [11328501, 11330514, "國立花蓮女中"], [11330601, 11332810, "國立臺東女中"], [11332901, 11333523, "國立澎湖科技大學"], [11333601, 11334531, "國立金門大學"], [11334601, 11334708, "國立馬祖高中"]];
 
-    let rawData = null;
-    let idToIndex = {};
-    let nameToIndex = {};
-    let deptToIndex = {};
+    let rawData = null, idToIndex = {}, schoolToDepts = {}, rowCounter = 0;
+    
+    // 用於記憶兩個模式的結果
+    let historyResults = {
+        normal: { ids: [], criteria: [] },
+        adv: { ids: [], criteria: [] }
+    };
+    let currentMode = 'normal';
 
     window.onload = async () => {
         try {
-            const response = await fetch(GITHUB_URL);
-            rawData = await response.json();
-            buildIndex();
-        } catch (e) {
-            document.getElementById('dataStatus').innerText = "❌ 資料載入失敗。";
-        }
-    };
-
-    function buildIndex() {
-        const types = { cac: "普通大學", jctv: "科技校院" };
-        for (let type in types) {
-            const schools = rawData[type];
-            for (let sName in schools) {
-                for (let dName in schools[sName]) {
-                    const ids = schools[sName][dName];
-                    const dKey = `${types[type]}-${sName}-${dName}`;
-                    deptToIndex[dKey] = ids;
-                    ids.forEach(id => {
-                        if (!idToIndex[id]) idToIndex[id] = [];
-                        idToIndex[id].push({ type: types[type], school: sName, dept: dName });
-                    });
+            const res = await fetch(GITHUB_URL);
+            rawData = await res.json();
+            
+            for (let t of ['cac', 'jctv']) {
+                const schools = rawData[t] || {};
+                for (let sName in schools) {
+                    if (!schoolToDepts[sName]) schoolToDepts[sName] = { type: t, depts: [] };
+                    for (let dName in schools[sName]) {
+                        schoolToDepts[sName].depts.push(dName);
+                        schools[sName][dName].forEach(id => {
+                            if (!idToIndex[id]) idToIndex[id] = [];
+                            idToIndex[id].push({ type: t, school: sName, dept: dName });
+                        });
+                    }
                 }
             }
-        }
-        for (let id in rawData.name_map) {
-            const name = rawData.name_map[id];
-            if (!nameToIndex[name]) nameToIndex[name] = [];
-            nameToIndex[name].push(id);
-        }
-        document.getElementById('dataStatus').innerText = "✅ 系統就緒，請輸入號碼或姓名";
-        document.getElementById('userInput').disabled = false;
-        document.getElementById('searchBtn').disabled = false;
+
+            const sl = document.getElementById('schoolList');
+            Object.keys(schoolToDepts).sort().forEach(s => {
+                const opt = document.createElement('option'); opt.value = s; sl.appendChild(opt);
+            });
+
+            const ss = document.getElementById('siteSelect');
+            [...new Set(TEST_SITES.map(x => x[2]))].sort().forEach(v => {
+                const o = document.createElement('option'); o.value = v; o.innerText = v; ss.appendChild(o);
+            });
+
+            document.getElementById('dataStatus').innerText = "✅ 數據就緒";
+            document.getElementById('searchBtn').disabled = false;
+            addAdmissionRow(); 
+        } catch (e) { document.getElementById('dataStatus').innerText = "❌ 載入失敗"; }
+    };
+
+    function addAdmissionRow() {
+        const container = document.getElementById('admissionList');
+        if (container.children.length >= 12) return;
+        rowCounter++;
+        const dlId = `depts_${rowCounter}`;
+        const row = document.createElement('div');
+        row.className = 'admission-row';
+        row.innerHTML = `
+            <input type="text" class="sch-input" list="schoolList" placeholder="校名..." oninput="onRowSchoolInput(this, '${dlId}')">
+            <div>
+                <input type="text" class="dept-input" list="${dlId}" placeholder="系組搜尋（先選學校）..." disabled>
+                <datalist id="${dlId}"></datalist>
+            </div>
+            <button type="button" class="remove-btn" onclick="this.parentElement.remove()">×</button>
+        `;
+        container.appendChild(row);
     }
 
-    function handleSearch() {
-        const query = document.getElementById('userInput').value.trim();
-        const container = document.getElementById('resultArea');
-        const hint = document.getElementById('footerHint');
-        
-        container.innerHTML = "";
-        hint.innerText = "";
-        
-        if (!query) return;
-
-        const isNumeric = /^\d+$/.test(query); // 判斷是否全為數字
-        let ids = [];
-
-        if (isNumeric) {
-            ids = idToIndex[query] ? [query] : []; // 直接從編號索引找
+    function onRowSchoolInput(schInput, dlId) {
+        const sName = schInput.value;
+        const row = schInput.parentElement;
+        const deptInput = row.querySelector('.dept-input');
+        const dl = document.getElementById(dlId);
+        dl.innerHTML = "";
+        deptInput.value = "";
+        if (schoolToDepts[sName]) {
+            schoolToDepts[sName].depts.sort().forEach(d => {
+                const opt = document.createElement('option'); opt.value = d; dl.appendChild(opt);
+            });
+            deptInput.disabled = false;
         } else {
-            const masked = maskName(query);
-            ids = nameToIndex[masked] || [];
+            deptInput.disabled = true;
         }
+    }
 
-        // 核心邏輯：查無資料時
-        if (ids.length === 0) {
-            if (isNumeric) {
-                container.innerHTML = `<div class="no-result-msg">你沒上榜，再接再厲</div>`;
+    function switchMode(m) {
+        currentMode = m;
+        document.getElementById('btn-norm').className = `mode-btn ${m==='normal'?'active':''}`;
+        document.getElementById('btn-adv').className = `mode-btn ${m==='adv'?'active':''}`;
+        document.getElementById('norm-section').style.display = m==='normal'?'block':'none';
+        document.getElementById('adv-section').className = `adv-area ${m==='adv'?'active':''}`;
+        
+        // 恢復該模式的歷史結果
+        render(historyResults[m].ids, historyResults[m].criteria);
+    }
+
+    function handleSearchClick() {
+        let finalIdsSet = new Set();
+        let criteria = [];
+
+        if (currentMode === 'normal') {
+            const q = document.getElementById('userInput').value.trim();
+            if (!q) return;
+            if (/^\d+$/.test(q)) {
+                if (idToIndex[q]) finalIdsSet.add(q);
             } else {
-                hint.innerText = "如果查無資料請用准考證";
+                const targetMask = maskName(q);
+                for (let id in rawData.name_map) {
+                    if (maskName(rawData.name_map[id]) === targetMask) finalIdsSet.add(id);
+                }
             }
-            return;
+        } else {
+            const site = document.getElementById('siteSelect').value;
+            if (!site) { alert("請先選擇考場"); return; }
+            const rows = document.querySelectorAll('.admission-row');
+            const ranges = TEST_SITES.filter(s => s[2] === site);
+            rows.forEach(row => {
+                const s = row.querySelector('.sch-input').value;
+                const d = row.querySelector('.dept-input').value;
+                if (s && d && schoolToDepts[s]) {
+                    const typeKey = schoolToDepts[s].type;
+                    const ids = rawData[typeKey][s][d] || [];
+                    criteria.push({ school: s, dept: d });
+                    ids.forEach(id => {
+                        if (ranges.some(r => id >= r[0] && id <= r[1])) finalIdsSet.add(id);
+                    });
+                }
+            });
         }
 
-        render(ids);
-        if (!isNumeric) hint.innerText = "如果查無資料請用准考證";
+        let results = Array.from(finalIdsSet);
+        if (currentMode === 'adv' && criteria.length > 0) {
+            results.sort((a, b) => {
+                const score = (id) => idToIndex[id].filter(ad => criteria.some(c => c.school === ad.school && c.dept === ad.dept)).length;
+                return score(b) - score(a);
+            });
+        }
+
+        // 儲存結果到記憶中
+        historyResults[currentMode] = { ids: results, criteria: criteria };
+        render(results, criteria);
     }
 
-    function maskName(name) {
-        if (!name || name.length < 2 || name.includes('Ｏ')) return name;
-        return name[0] + 'Ｏ' + (name.length > 2 ? name[name.length - 1] : '');
-    }
+    function maskName(n) { return (n.length < 2 || n.includes('Ｏ')) ? n : n[0] + 'Ｏ' + (n.length > 2 ? n[n.length - 1] : ''); }
 
-    function getSite(id) {
+    function getSiteName(id) {
         const val = parseInt(id);
         const match = TEST_SITES.find(s => val >= s[0] && val <= s[1]);
         return match ? match[2] : "未知考場";
     }
 
-    function render(ids) {
-        const container = document.getElementById('resultArea');
-        const isSingle = ids.length === 1;
+    function render(ids, criteria) {
+        const area = document.getElementById('resultArea');
+        area.innerHTML = "";
+        if (ids.length === 0) return;
 
         ids.forEach(id => {
-            const name = rawData.name_map[id] || "（無姓名紀錄）";
-            const site = getSite(id);
-            const depts = idToIndex[id] || [];
+            const wrap = document.createElement('div');
+            wrap.className = `student-wrapper ${ids.length <= 1 ? 'active' : ''}`;
+            const recs = [...idToIndex[id]];
+            const siteName = getSiteName(id);
+            
+            recs.sort((a, b) => {
+                const isAMatch = criteria.some(c => c.school === a.school && c.dept === a.dept);
+                const isBMatch = criteria.some(c => c.school === b.school && c.dept === b.dept);
+                return (isBMatch ? 1 : 0) - (isAMatch ? 1 : 0);
+            });
 
-            const wrapper = document.createElement('div');
-            wrapper.className = `student-wrapper ${isSingle ? 'active' : ''}`;
-
-            let deptsHtml = depts.map(item => {
-                const dKey = `${item.type}-${item.school}-${item.dept}`;
-                const tagClass = item.type === "普通大學" ? "tag-cac" : "tag-jctv";
+            let html = recs.map(r => {
+                const isMatch = criteria.some(c => c.school === r.school && c.dept === r.dept);
                 return `
-                    <div class="school-card" onclick="openModal('${dKey}')">
-                        <div>
-                            <span class="type-tag ${tagClass}">${item.type}</span>
-                            <div style="font-weight:bold; font-size:18px;">${item.school}</div>
-                            <div style="font-size:14px; color:#64748b;">${item.dept}</div>
-                        </div>
-                        <span style="color:#cbd5e1">❯</span>
+                <div class="school-card ${isMatch ? 'card-hit' : ''}" onclick="openDeptModal('${r.type}','${r.school}','${r.dept}')">
+                    <div>
+                        <span class="tag ${r.type==='cac'?'tag-cac':'tag-jctv'}">${r.type==='cac'?'普大':'科大'}</span>
+                        <div style="font-weight:bold;">${r.school}</div>
+                        <div style="font-size:13px; color:#64748b;">${r.dept}</div>
                     </div>
-                `;
+                    <span>❯</span>
+                </div>`;
             }).join('');
 
-            wrapper.innerHTML = `
-                <div class="student-header" onclick="toggleStudent(this)">
+            wrap.innerHTML = `
+                <div class="student-header" onclick="this.parentElement.classList.toggle('active')">
                     <div>
-                        <h2>${name}</h2>
-                        <div class="info-row">應試號碼：${id}</div>
-                        <div class="site-badge">考場：<span class="site-name">${site}</span></div>
+                        <b>${rawData.name_map[id] || "（未公開）"}</b><br>
+                        <small>應試號碼: ${id}</small><br>
+                        <div class="site-info">📍 ${siteName}</div>
                     </div>
-                    <div class="arrow">▼</div>
+                    <span style="font-size:12px;">▼ 詳情</span>
                 </div>
-                <div class="student-content">
-                    ${deptsHtml || '<div style="color:#94a3b8; text-align:center; padding:20px;">尚無錄取紀錄</div>'}
-                </div>
+                <div class="student-content">${html}</div>
             `;
-            container.appendChild(wrapper);
+            area.appendChild(wrap);
         });
     }
 
-    function toggleStudent(header) {
-        header.parentElement.classList.toggle('active');
-    }
-
-    function openModal(dKey) {
-        const ids = deptToIndex[dKey];
-        const [type, school, dept] = dKey.split('-');
+    function openDeptModal(type, school, dept) {
+        const ids = rawData[type][school][dept] || [];
         document.getElementById('modalTitle').innerText = dept;
         document.getElementById('modalSubTitle').innerText = school;
-        document.getElementById('modalCount').innerText = `📊 共計 ${ids.length} 位上榜`;
+        document.getElementById('modalCount').innerText = `📊 此科系共計 ${ids.length} 位上榜`;
         
         const body = document.getElementById('modalBody');
         body.innerHTML = "";
         ids.forEach(id => {
-            const name = rawData.name_map[id] || "（無名）";
             const div = document.createElement('div');
             div.className = 'list-item';
-            div.innerHTML = `<span>${name}</span><span style="color:#94a3b8; font-family:monospace">${id}</span>`;
-            div.onclick = () => { closeModal(); render([id]); window.scrollTo({top:0, behavior:'smooth'}); };
+            div.innerHTML = `<span>${rawData.name_map[id] || "（名單中）"}</span><span style="color:#94a3b8; font-family:monospace">${id}</span>`;
+            div.onclick = () => { 
+                closeModal(); 
+                historyResults[currentMode] = { ids: [id], criteria: [] };
+                render([id], []); 
+                window.scrollTo({top:0, behavior:'smooth'}); 
+            };
             body.appendChild(div);
         });
         document.getElementById('deptModal').style.display = 'block';
